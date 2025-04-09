@@ -1,0 +1,250 @@
+{% extends "templates_base/layout.html" %}
+{% block title %}Panel de Usuarios{% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Panel de búsqueda de Usuarios del sistema</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('user_dashboard.order') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="order" class="form-label">Ordenar por:</label>
+                    <select name="order" id="order" class="form-select">
+                        <option value="email" {% if order=='email' %}selected{% endif %}>Email</option>
+                        <option value="inserted_at" {% if order=='inserted_at' %}selected{% endif %}>Fecha de creación</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="search_by" class="form-label">Buscar por:</label>
+                    <select name="search_by" id="search_by" class="form-select" onchange="handleFilterChange()">
+                        <option value="email" {% if search_by=='email' %}selected{% endif %}>Email</option>
+                        <option value="rol" {% if search_by=='rol' %}selected{% endif %}>Rol</option>
+                        <option value="active" {% if search_by=='active' %}selected{% endif %}>¿Activo?</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" id="rolDropdown" style="display:none;">
+                    <label for="rol" class="form-label">Rol:</label>
+                    <select name="role_value" id="role_value" class="form-select">
+                        <option value="Administracion" {% if search_value=='Administracion' %}selected{% endif %}>Administracion</option>
+                        <option value="Tecnica" {% if search_value=='Tecnica' %}selected{% endif %}>Tecnica</option>
+                        <option value="Ecuestre" {% if search_value=='Ecuestre' %}selected{% endif %}>Ecuestre</option>
+                        <option value="Voluntariado" {% if search_value=='Voluntariado' %}selected{% endif %}>Voluntariado</option>
+                        <option value="Editor" {% if search_value=='Editor' %}selected{% endif %}>Editor</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" id="activoDropdown" style="display:none;">
+                    <label for="activo" class="form-label">¿Activo?</label>
+                    <select name="activo" id="activo" class="form-select">
+                        <option value="si" {% if search_value == 'si' %}selected{% endif %}>SI</option>
+                        <option value="no"{% if search_value == 'no' %}selected{% endif %}>NO</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" id="search_value" style="display:none;">
+                    <label for="search_value" class="form-label">Valor de búsqueda:</label>
+                    <input type="text" name="search_value" id="search_value_input" class="form-control"
+                        value="{% if search_by == 'email'  %}{{ search_value }}{% else %}{% endif %}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" id="toggleOrder" class="btn btn-outline-secondary form-control" value="{{ order_direction }}">
+                        {{ 'Asc' if order_direction == 'asc' else 'Desc' }}
+                    </button>
+                </div>
+
+                <input type="hidden" name="order_direction" id="order_direction" value="{{ order_direction }}">
+                <input type="hidden" name="page" id="page" value="{{ pagination.page }}">
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary" onclick="goToPage(1)">Filtrar</button>
+                </div>
+            </form>
+            
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" id="resetFilters" class="btn btn-outline-danger form-control" onclick="resetPage()">Limpiar filtros</button>
+            </div>            
+
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for user in users %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ user.name }} {{ user.last_name }}</h5>
+                        <p class="card-text">Email: {{ user.email }}</p>
+                        <p class="card-text">Alias: {{ user.alias }}</p>
+                        <p class="card-text">Fecha de creación: {{ user.inserted_at.strftime('%d-%m-%Y') }}</p>
+                        <div class="d-flex justify-content-center" style="gap: 3px;">
+                            <button type="button" class="btn btn-info" onclick="showUserDetails('{{ user.id }}')">Ver detalles</button>
+                            {% if not user.system_admin %}
+                                {% if user.active %}
+                                    <button type="button" class="btn btn-danger" onclick="openUserActionModal('{{ user.id }}', '{{ user.alias }}', 'block')">Bloquear</button>
+                                {% else %}
+                                    <button type="button" class="btn btn-success" onclick="openUserActionModal('{{ user.id }}', '{{ user.alias }}', 'unblock')">Desbloquear</button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="goToPage('{{ pagination.prev_num }}')" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if users %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{ pagination.pages }}</a></li>
+            {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página 0 de 0</a></li>
+            {% endif %}
+            {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage('{{ pagination.next_num }}')" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Modal Reutilizable -->
+    <div class="modal fade" id="userActionModal" tabindex="-1" aria-labelledby="userActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userActionModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="userActionMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="userActionForm" method="POST">
+                        <input type="hidden" name="user_id" id="userId">
+                        <button type="submit" class="btn" id="confirmActionButton"></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    const toggleButton = document.getElementById('toggleOrder');
+    const orderInput = document.getElementById('order_direction');
+
+    toggleButton.addEventListener('click', function () {
+        if (toggleButton.value === 'asc') {
+            toggleButton.textContent = 'Desc';
+            toggleButton.value = 'desc';
+            orderInput.value = 'desc';
+        } else {
+            toggleButton.textContent = 'Asc';
+            toggleButton.value = 'asc';
+            orderInput.value = 'asc';
+        }
+    });
+
+    function goToPage(pageNumber) {
+        const pageInput = document.getElementById('page');
+        
+        pageInput.value = pageNumber;
+        document.forms[0].submit();
+    }
+
+    function handleFilterChange() {
+        const search_by = document.getElementById('search_by').value;
+        const searchField = document.getElementById('search_value');
+        const rolDropdown = document.getElementById('rolDropdown');
+        const activoDropdown = document.getElementById('activoDropdown');
+
+        // Ocultar ambos campos inicialmente
+        searchField.style.display = 'none';
+        rolDropdown.style.display = 'none';
+        activoDropdown.style.display = 'none';
+
+        // Mostrar campo de búsqueda o dropdown según la opción seleccionada
+        if (search_by === 'rol') {
+            rolDropdown.style.display = 'block';
+        } else if (search_by === 'email') {
+            searchField.style.display = 'block';
+        } else {
+            activoDropdown.style.display = 'block';
+        }
+    }
+
+    // Inicialmente esconder todos
+    document.addEventListener('DOMContentLoaded', handleFilterChange);
+
+    function showUserDetails(userId) {
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = "{{ url_for('user_dashboard.details') }}";
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'user_id';
+        input.value = userId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function resetPage() {
+        window.location.href = "{{ url_for('user_dashboard.order') }}";
+    }
+
+    function openUserActionModal(userId, userName, action) {
+        const modalTitle = document.getElementById('userActionModalLabel');
+        const modalMessage = document.getElementById('userActionMessage');
+        const actionForm = document.getElementById('userActionForm');
+        const confirmButton = document.getElementById('confirmActionButton');
+        const userIdInput = document.getElementById('userId');
+
+        // Configurar el contenido dinámico
+        if (action === 'block') {
+            modalTitle.textContent = 'Bloquear Usuario';
+            modalMessage.textContent = `¿Está seguro de que desea bloquear al usuario ${userName}?`;
+            actionForm.action = "{{ url_for('user_dashboard.delete') }}";
+            confirmButton.textContent = 'Bloquear';
+            confirmButton.className = 'btn btn-danger';
+        } else if (action === 'unblock') {
+            modalTitle.textContent = 'Desbloquear Usuario';
+            modalMessage.textContent = `¿Está seguro de que desea desbloquear al usuario ${userName}?`;
+            actionForm.action = "{{ url_for('user_dashboard.activate') }}";
+            confirmButton.textContent = 'Desbloquear';
+            confirmButton.className = 'btn btn-success';
+        }
+
+        // Asignar el ID del usuario al input oculto
+        userIdInput.value = userId;
+
+        // Mostrar el modal
+        const modal = new bootstrap.Modal(document.getElementById('userActionModal'));
+        modal.show();
+    }
+
+</script>
+{% endblock %}

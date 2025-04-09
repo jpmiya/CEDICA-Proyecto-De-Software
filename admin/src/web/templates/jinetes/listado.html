@@ -1,0 +1,167 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Listado de Jinetes y Amazonas {% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+<h2 class="">Jinetes y amazonas</h2>
+<form id="filtros" method="get" class="responsive-form">
+    <!-- Primera fila -->
+    <div>
+        <!-- Nombre -->
+        <div>
+            <label for="input_name" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="input_name" name="name" placeholder="Nombre"
+                value="{{ params.get('name', '') }}">
+        </div>
+        <!-- Apellido -->
+        <div>
+            <label for="input_last_name" class="form-label">Apellido</label>
+            <input type="text" class="form-control" id="input_last_name" name="last_name" placeholder="Apellido"
+                value="{{ params.get('last_name', '') }}">
+        </div>
+        <!-- DNI -->
+        <div>
+            <label for="input_dni" class="form-label">D.N.I</label>
+            <input type="text" class="form-control" id="input_dni" name="dni" placeholder="Ingrese el D.N.I."
+                maxlength="8" minlength="8" pattern="\d{8}" title="Ingrese un DNI válido (8 digitos sin puntos)" value="{{ params.get('dni', '') }}">
+        </div>
+    </div>
+    <!-- Segunda fila -->
+    <div>
+    
+        <!-- Empleado -->
+        <div>
+            <label class="form-label" for="employee">Profesionales que lo atienden</label>
+            <input class="form-control" type="text" name="employee" id="employee" value="{{ params.get('employee', '') }}"/>
+        </div>
+        <!-- Orden -->
+        <div>
+            <label for="order" class="form-label">Seleccione un orden</label>
+            <select name="order" id="order" class="form-select">
+                <option value="">--Orden--</option>
+                <option value="nombreA-Z" {% if params.get('order', '')=='nombreA-Z' %}selected{% endif %}>Nombre A-Z</option>
+                <option value="nombreZ-A" {% if params.get('order', '')=='nombreZ-A' %}selected{% endif %}>Nombre Z-A</option>
+                <option value="apellidoA-Z" {% if params.get('order', '')=='apellidoA-Z' %}selected{% endif %}>Apellido A-Z</option>
+                <option value="apellidoZ-A" {% if params.get('order', '')=='apellidoZ-A' %}selected{% endif %}>Apellido Z-A</option>
+            </select>
+        </div>
+    </div>
+    <hr>
+    <!-- Botones -->
+    <div class="row">
+        <div class="col">
+            <div class="text-end">
+                <a href="{{ url_for('riders.index') }}" class="btn btn-secondary">Limpiar filtros</a>
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+    <br>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for rider in riders_paginated.items %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ rider.name }} {{ rider.last_name }}</h5>
+                    <p class="card-text">DNI: {{ rider.dni }}</p>
+                    
+                    <div class="d-flex justify-content-center" style="gap: 3px;">
+                        <a href="{{ url_for('riders.show_rider', user_id=rider.id) }}" class="btn btn-info">Ver Detalles</a>
+                   
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-rider-id="{{ rider.id }}">
+                            Dar de baja
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        {% endfor %}
+    </div>
+
+    {% if riders_paginated.items|length == 0 %}
+    <div class="col-12 text-center my-4">
+        <div class="alert alert-warning py-4">
+            <h5>No se encontraron resultados</h5>
+            
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if riders_paginated.items|length != 0 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if riders_paginated.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ prev_page }}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ riders_paginated.page }} de {{
+                        riders_paginated.pages }}</a></li>
+                {% if riders_paginated.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ next_page }}"  aria-label="Siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmación de Baja</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas dar de baja a este jinete? Esta acción es <strong>irreversible</strong>.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <!-- Formulario con el campo oculto para enviar el ID del jinete -->
+                    <form action="{{ url_for('riders.delete_rider') }}" method="POST" style="display: inline;">
+                        <input type="hidden" name="rider_id" id="modalRiderId">
+                        <button type="submit" class="btn btn-danger">Dar de baja</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+</div>
+</div>
+
+
+<script>
+    // Captura el evento de apertura del modal y actualiza el rider_id
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+            // Botón que disparó el modal
+            var button = event.relatedTarget;
+            // Extrae el rider_id del atributo data-rider-id
+            var riderId = button.getAttribute('data-rider-id');
+            // Actualiza el campo oculto con el ID del jinete
+            var modalRiderIdInput = document.getElementById('modalRiderId');
+            modalRiderIdInput.value = riderId;
+        });
+    });
+</script>
+
+
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}" >◄ Volver</a>
+{% endblock %}

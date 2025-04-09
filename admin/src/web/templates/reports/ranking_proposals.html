@@ -1,0 +1,71 @@
+{% extends 'templates_base/layout.html' %}
+
+{% block title %}
+    Ranking de Propuestas
+{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center">Ranking de Propuestas</h2>
+        </div>
+        {% if ranking %}
+            <div class="col-md-12 text-center">
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('reports.download_ranking') }}" class="btn btn-success">
+                        Descargar (PDF)
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-12 text-center">
+                <div class="text-center mt-4">
+                    <a href="#" class="btn btn-success disabled" title="No hay datos que descargar">
+                        Descargar (PDF)
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+
+    <!-- Verificar si ranking tiene datos -->
+    {% if ranking %}
+        <!-- Tabla para el ranking -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Propuesta</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for propuesta, count in ranking.items() %}
+                <tr>
+                    <td>{{ propuesta }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botón para descargar -->
+        
+    {% else %}
+        <!-- Alerta si no hay datos -->
+        <div class="alert alert-warning text-center" role="alert">
+            No hay datos disponibles para mostrar en el ranking.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('reports.index') }}" >◄ Volver</a>
+{% endblock %}

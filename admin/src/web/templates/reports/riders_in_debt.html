@@ -1,0 +1,69 @@
+{% extends 'templates_base/layout.html' %}
+
+{% block title %}
+    Jinetes/Amazonas por sede
+{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center">Jinetes/Amazonas deudores</h2>
+        </div>
+        {% if riders|length == 0 %}
+            <div class="col-md-12 text-center">
+                <div class="text-center mt-4">
+                    <a href="#" class="btn btn-success disabled" title="No hay datos que descargar">
+                        Descargar (PDF)
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-12 text-center">
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('reports.download_riders_in_debt') }}" class="btn btn-success">
+                        Descargar (PDF)
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+
+    {% if riders|length == 0 %}
+        <p class="text-center">No hay jinetes con deudas registradas.</p>
+    {% else %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Apellido</th>
+                    <th>Nombre</th>
+                    <th>DNI</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rider in riders %}
+                    <tr>
+                        <td>{{ rider.last_name }}</td>
+                        <td>{{ rider.name }}</td>
+                        <td>{{ rider.dni }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        
+    {% endif %}
+    
+
+</div>
+
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('reports.index') }}" >◄ Volver</a>
+{% endblock %}

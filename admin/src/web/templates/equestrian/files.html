@@ -1,0 +1,283 @@
+{% extends "templates_base/layout.html" %}
+{% block title %}Panel de Caballos{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>{{ horse.name }}</h2>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            
+            <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{{ url_for('equestrian_details.details', horse_id=horse.id) }}">Información general</a>
+            </li>                
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Documentación</a>
+            </li> 
+        </ul>
+    </div>
+    <h1 class="mb-4">Panel de archivos del caballo {{ horse.name }}</h1>
+    <form method="GET" action="{{ url_for('equestrian_details.horse_files', horse_id = horse.id) }}">
+        <input type="hidden" name="id" value="{{ horse.id }}"/>
+        <div class="row">
+            <div class="col">
+                <label for="search_by" class="form-label">Titulo:</label>
+                <input type="text" name="search_value" id="search_value" class="form-control" placeholder="Ingrese un título" value="{{ params.get("search_value","") }}"/>
+            </div>
+
+            <div class="col">
+                <label for="document_type" class="form-label">Tipo de documento</label>
+                <select id="type" name="document_type" class="form-select">
+                    <option value="" {% if params.get('document_type', '')=='' %}selected{% endif %}>Seleccione una opción</option>
+                    <option value="ficha_general" {% if params.get('document_type', '')=='ficha_general' %}selected{% endif %}>Ficha general</option>
+                    <option value="planificacion" {% if params.get('document_type', '')=='planificacion' %}selected{% endif %}>Planificación</option>
+                    <option value="informe_de_evaluacion" {% if params.get('document_type', '')=='informe_de_evaluacion' %}selected{% endif %}>Informe de evaluación</option>
+                    <option value="carga_de_imagenes" {% if params.get('document_type', '')=='carga_de_imagenes' %}selected{% endif %}>Carga de imágenes</option>
+                    <option value="registro_veterinario" {% if params.get('document_type', '')=='registro_veterinario' %}selected{% endif %}>Registro veterinario</option>
+                    
+                </select>
+            </div>
+    
+            <div class="col">
+                <label for="order" class="form-label">Ordenar por:</label>
+                <select name="order" id="order" class="form-select">
+                    <option value="">--Orden--</option>
+                    <option value="titleA-Z" {% if params.get("order", "")=='titleA-Z' %}selected{% endif %}>Titulo A-Z</option>
+                    <option value="titleZ-A" {% if params.get("order", "")=='titleZ-A' %}selected{% endif %}>Titulo Z-A</option>
+                    <option value="newer" {% if params.get("order", "")=='newer' %}selected{% endif %}>Más recientes</option>
+                    <option value="older" {% if params.get("order", "")=='older' %}selected{% endif %}>Más antiguos</option>
+                </select>
+            </div>
+
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-12 text-end">
+                <a class="btn btn-secondary" href="{{ url_for("equestrian_details.horse_files", horse_id=horse.id)}}">Limpiar filtros</a>
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </div>
+        </div>
+    
+
+        
+    </form>
+    {% if check_permission('horse_update') %}
+    <br>
+    <div class="row justify-content-center g-3">
+        <div class="col-auto">
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('equestrian_details.show_upload_link', horse_id=horse.id) }}">
+                Subir enlace
+            </a>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-primary btn-lg" href="{{ url_for('equestrian_details.show_upload_document', horse_id=horse.id) }}">
+                Subir nuevo documento
+            </a>
+        </div>
+    </div>
+    <br>
+    {% endif %} 
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% if documents %}
+            {% for document in documents %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-center">{{ document.title }}</h5>
+                            <p class="card-text">Tipo de archivo: {{ document.type.replace('_', ' ').capitalize() }}</p>
+                            <p class="card-text">Fecha de subida: {{ document.created_at.strftime('%d/%m/%Y') }}</p>
+                            {% if document.format == 'link' %}
+                                <a class="btn btn-info mb-2" href="{{ document.source }}" target="_blank">Ir a archivo</a>
+                            {% else %}
+                                <button type="button" class="btn btn-info mb-2" onclick="downloadFile('{{ document.id }}', '{{ horse.id }}')">Descargar</button>
+                            {% endif %}
+                            
+                            {% if check_permission('horse.update') %}
+                            <div class="d-flex justify-content-center" style="gap: 3px;">
+                                <button 
+                                    type="button" 
+                                    class="btn btn-warning" 
+                                    onclick="showUpdateFileModal('{{ document.id }}', '{{ horse.id }}', '{{ document.title }}', '{{ document.type }}')">
+                                    Modificar
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-danger " 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteDocumentModal" 
+                                    onclick="populateDeleteModal('{{ document.id }}', '{{ horse.id }}')">
+                                    Eliminar
+                                </button>
+                            </div>
+
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-md-12 text-center" style="justify-content: center;">
+            <div class="alert alert-warning">
+                No hay documentos cargados sobre el caballo.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% if documents %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ prev_page }}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{
+                    pagination.pages }}</a></li>
+               
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ next_page }}" aria-label="Siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+    <!-- Modal -->
+    <div class="modal fade" id="updateFileModal" tabindex="-1" aria-labelledby="updateFileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('equestrian_details.modify_document') }}" style="background-color: white;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateFileModalLabel">Modificar Documento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="document_id" name="document_id">
+                        <input type="hidden" id="horse_id" name="horse_id">
+                        <input type="hidden" id="id" name="id" value=""/>
+    
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Nuevo título</label>
+                            <input type="text" class="form-control" id="title" name="title" maxlength="30" required>
+                            <div class="form-text">Máximo 30 caracteres.</div>
+                        </div>
+    
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Tipo de Documento</label>
+                            <select id="type_modal" name="document_type" class="form-select" required>
+                                <option value="">Seleccione una opción</option>
+                                <option value="ficha_general">Ficha general</option>
+                                <option value="planificacion">Planificación</option>
+                                <option value="informe_de_evaluacion">Informe de evaluación</option>
+                                <option value="carga_de_imagenes">Carga de imágenes</option>
+                                <option value="registro_veterinario">Registro veterinario</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="page" id="page" value="{{ page }}"/>
+    <div class="modal fade" id="deleteDocumentModal" tabindex="-1" aria-labelledby="deleteDocumentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteDocumentModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form method="POST" action="{{ url_for('equestrian_details.delete_document') }}">
+                    <div class="modal-body">
+                        <p>¿Está seguro de que desea eliminar este archivo?</p>
+                        <!-- Campos ocultos para enviar los datos -->
+                        <input type="hidden" name="document_id" id="modalDocumentId">
+                        <input type="hidden" name="horse_id" id="modalHorseId">
+                        <input type="hidden" name="page" value="{{ request.args.get('page', default=1) }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function downloadFile(documentId, horseId) {
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = " {{ url_for('equestrian_details.download_horse_files') }} ";
+        const input = document.createElement('input');
+        const input2 = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'document_id';
+        input.value = documentId;
+        input2.type = 'hidden';
+        input2.name = 'horse_id';
+        input2.value = horseId;
+
+        form.appendChild(input);
+        form.appendChild(input2);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function showUpdateFileModal(documentId, horseId, currentTitle, currentType) {
+        
+        // Asignar valores al formulario dentro del modal
+        document.getElementById('document_id').value = documentId;
+        document.getElementById('horse_id').value = horseId;
+        document.getElementById('title').value = currentTitle;
+        
+        // Configurar el tipo de documento seleccionado
+        const typeSelect = document.getElementById('type_modal');
+        
+        // Verificar si currentType está en las opciones del select
+        if (Array.from(typeSelect.options).some(option => option.value === currentType)) {
+            typeSelect.value = currentType;
+
+        // Mostrar el modal
+        const updateFileModal = new bootstrap.Modal(document.getElementById('updateFileModal'));
+        updateFileModal.show();
+        }
+    }
+
+    function submitUpdateFileForm() {
+        const title = document.getElementById('title').value;
+
+        // Validar que el título no supere 30 caracteres
+        if (title.length > 30) {
+            alert('El título no puede superar los 30 caracteres.');
+            return;
+        }
+
+        // Enviar el formulario
+        document.getElementById('updateFileForm').submit();
+    }
+
+    function populateDeleteModal(documentId, horseId) {
+        // Asignar valores a los campos ocultos del modal
+        document.getElementById('modalDocumentId').value = documentId.trim();
+        document.getElementById('modalHorseId').value = horseId.trim();
+    }
+
+</script>
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('equestrian_dashboard.index') }}" >◄ Volver</a>
+{% endblock %}

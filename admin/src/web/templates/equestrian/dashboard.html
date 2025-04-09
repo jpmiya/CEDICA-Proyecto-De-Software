@@ -1,0 +1,259 @@
+{% extends "templates_base/layout.html" %}
+{% block title %}Panel de Caballos{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Panel de búsqueda de Caballos</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('equestrian_dashboard.order_horses') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="order" class="form-label">Ordenar por:</label>
+                    <select name="order" id="order" class="form-select">
+                        <option value="name" {% if order=='name' %}selected{% endif %}>Nombre</option>
+                        <option value="birth_date" {% if order=='birth_date' %}selected{% endif %}>Fecha de Nacimiento</option>
+                        <option value="entry_date" {% if order=='entry_date' %}selected{% endif %}>Fecha de Ingreso</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="search_by" class="form-label">Buscar por:</label>
+                    <select name="search_by" id="search_by" class="form-select" onchange="handleFilterChange()">
+                        <option value="name" {% if search_by=='name' %}selected{% endif %}>Nombre</option>
+                        <option value="rider" {% if search_by=='rider' %}selected{% endif %}>Tipo de J&A Asignado</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" id="search_value" style="display:none;">
+                    <label for="search_value" class="form-label">Valor de búsqueda:</label>
+                    <input type="text" name="search_value" id="search_value" class="form-control"
+                        value="{% if search_by == 'name' %}{{ search_value }}{% endif %}">
+                </div>
+
+                <div class="col-md-3" id="riderDropdown" style="display:none;">
+                    <label for="rider_value" class="form-label">Tipo de J&A Asignado:</label>
+                    <select name="rider_value" id="rider_value" class="form-select">
+                        <option value="Hipoterapia" {% if search_value=='Hipoterapia' %}selected{% endif %}>Hipoterapia</option>
+                        <option value="Monta Terapeutica" {% if search_value=='Monta Terapeutica' %}selected{% endif %}>Monta Terapéutica</option>
+                        <option value="Deporte Ecuestre Adaptado" {% if search_value=='Deporte Ecuestre Adaptado' %}selected{% endif %}>Deporte Ecuestre Adaptado</option>
+                        <option value="Actividades Recreativas" {% if search_value=='Actividades Recreativas' %}selected{% endif %}>Actividades Recreativas</option>
+                        <option value="Equitacion" {% if search_value=='Equitacion' %}selected{% endif %}>Equitacion</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" id="toggleOrder" class="btn btn-outline-secondary form-control"
+                        value="{{ order_direction }}">
+                        {{ 'Asc' if order_direction == 'asc' else 'Desc' }}
+                    </button>
+                </div>
+
+                <input type="hidden" name="order_direction" id="orderInput" value="{{ order_direction }}">
+                <input type="hidden" name="page" id="page" value="{{ pagination.page }}">
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary" onclick="goToPage(1)">Filtrar</button>
+                </div>
+            </form>
+            
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" id="resetFilters" class="btn btn-outline-danger form-control" onclick="resetPage()">Limpiar filtros</button>
+            </div>            
+
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for horse in horses %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ horse.name }} </h5>
+                    <p class="card-text">Sexo: {{ horse.gender }}</p>
+                    <p class="card-text">Fecha Nacimiento: {{ horse.birth_date.strftime('%d/%m/%Y') }}</p>
+                    <p class="card-text">Tipo de J&A Asignados: {{ horse.rider_type }}</p>
+                    <div class="d-flex justify-content-center" style="gap: 3px;">
+                        {% if check_permission('horse_show') %}
+                            <button type="button" class="btn btn-info" onclick="showHorseDetails('{{ horse.id }}')">Ver detalles</button>
+                        {% endif %}
+
+                        {% if check_permission('horse_destroy') %}
+                            {% if horse.active %}
+                                <button type="button" class="btn btn-danger" 
+                                        onclick="openDeleteHorseModal('{{ horse.id }}', '{{ horse.name }}', 'baja')">Dar de baja</button>
+                            {% else %}
+                                <button type="button" class="btn btn-success" 
+                                        onclick="openDeleteHorseModal('{{ horse.id }}', '{{ horse.name }}', 'alta')">Dar de alta</button>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+        {% if pagination.pages >= 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage('{{ pagination.prev_num }}')" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{
+                        pagination.pages }}</a></li>
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage('{{ pagination.next_num }}')" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% else %}
+        <div class="alert alert-warning mt-4 text-center" role="alert">
+            No se encontraron caballos.
+        </div>
+        {% endif %}
+
+    <!-- Modal de eliminación -->
+    <div class="modal fade" id="deleteHorseModal" tabindex="-1" aria-labelledby="deleteHorseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteHorseModalLabel">Confirmar Acción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro de que desea <span id="deleteHorseAction"></span> al caballo <span id="deleteHorseName"></span>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteHorseForm" method="POST" action="{{ url_for('equestrian_dashboard.delete') }}">
+                        <input type="hidden" name="horse_id" id="deleteHorseId">
+                        <button type="submit" class="btn btn-danger" id="confirmDeleteHorseButton">Confirmar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+</div>
+
+<script>
+    const toggleButton = document.getElementById('toggleOrder');
+    const orderInput = document.getElementById('orderInput');
+
+
+    toggleButton.addEventListener('click', function () {
+        if (toggleButton.value === 'asc') {
+            toggleButton.textContent = 'Desc';
+            toggleButton.value = 'desc';
+            orderInput.value = 'desc';
+        } else {
+            toggleButton.textContent = 'Asc';
+            toggleButton.value = 'asc';
+            orderInput.value = 'asc';
+        }
+    });
+
+    function goToPage(pageNumber) {
+        const pageInput = document.getElementById('page');
+        
+        pageInput.value = pageNumber;
+        document.forms[0].submit();
+    }
+
+    
+    function handleFilterChange() {
+        const search_by = document.getElementById('search_by').value;
+        const searchField = document.getElementById('search_value');
+        const riderDropdown = document.getElementById('riderDropdown');
+
+        // Ocultar ambos campos inicialmente
+        searchField.style.display = 'none';
+        riderDropdown.style.display = 'none';
+
+        // Mostrar campo de búsqueda o dropdown según la opción seleccionada
+        if (search_by === 'rider') {
+            riderDropdown.style.display = 'block';
+        }
+        else {
+            searchField.style.display = 'block';
+        }
+    }
+
+    // Inicialmente esconder todos
+    document.addEventListener('DOMContentLoaded', handleFilterChange);
+
+    function showHorseDetails(horseId) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('equestrian_dashboard.details') }}";
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'horse_id';
+        input.value = horseId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function resetPage() {
+        window.location.href = "{{ url_for('equestrian_dashboard.order_horses') }}";
+    }
+
+    function deleteHorse(horseId, horseName, tipo) {
+        if (confirm("¿Quiere dar de " + tipo + " al caballo " + horseName + "?")) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ url_for('equestrian_dashboard.delete') }}";
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'horse_id';
+            input.value = horseId;
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    function openDeleteHorseModal(horseId, horseName, action) {
+        // Configurar los datos en el modal
+        document.getElementById('deleteHorseAction').textContent = action === 'baja' ? 'dar de baja' : 'dar de alta';
+        document.getElementById('deleteHorseName').textContent = horseName;
+        document.getElementById('deleteHorseId').value = horseId;
+
+        // Cambiar el estilo del botón de confirmación según la acción
+        const confirmButton = document.getElementById('confirmDeleteHorseButton');
+        confirmButton.className = action === 'baja' ? 'btn btn-danger' : 'btn btn-success';
+
+        // Abrir el modal
+        const modal = new bootstrap.Modal(document.getElementById('deleteHorseModal'));
+        modal.show();
+    }
+
+</script>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}" >◄ Volver</a>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Subir enlace de jinete {% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+    
+    <h4> Caballo: {{ horse.name }}</h4>
+    <h2 class="text-center mb-4">Subir Enlace</h2>
+    <form action="{{ url_for('equestrian_details.upload_link', horse_id = horse.id) }}" method="POST">
+        <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+        <div class="form-group">
+            <label for="title">Título del Enlace (*)</label>
+            <input type="text" class="form-control" id="title"
+            value = "{{ params.get('title', '') }}"
+            maxlength="30"
+            name="title" placeholder="Escribe el título" required>
+        </div>
+        <div class="form-group">
+            <label for="type">Tipo del enlace (*)</label>
+            <select id="type" name="document_type" class="form-select">
+                <option value="" {% if params.get('document_type', '')=='' %}selected{% endif %}>Seleccione una opción</option>
+                <option value="ficha_general" {% if params.get('document_type', '')=='ficha_general' %}selected{% endif %}>Ficha general</option>
+                <option value="planificacion" {% if params.get('document_type', '')=='planificacion' %}selected{% endif %}>Planificación</option>
+                <option value="informe_de_evaluacion" {% if params.get('document_type', '')=='informe_de_evaluacion' %}selected{% endif %}>Informe de evaluación</option>
+                <option value="carga_de_imagenes" {% if params.get('document_type', '')=='carga_de_imagenes' %}selected{% endif %}>Carga de imágenes</option>
+                <option value="registro_veterinario" {% if params.get('document_type', '')=='registro_veterinario' %}selected{% endif %}>Registro veterinario</option>
+                
+            </select>
+            
+        </div>
+        <div class="form-group mt-3">
+            <label for="link">Enlace (*)</label>
+            <input type="url" class="form-control" id="link" name="link"
+            value="{{ params.get('link', '')}}"
+            placeholder="Pega el enlace" required > 
+            
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col text-end">
+                    <button type="reset" class="btn btn-secondary w-100 mt-4">Limpiar</button>
+                    <button type="submit" class="btn btn-primary w-100 mt-4">Subir Enlace</button>
+                </div>
+            </div>
+        </div>
+        
+    </form>
+
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('equestrian_details.horse_files', horse_id=horse.id) }}" >◄ Volver</a>
+{% endblock %}

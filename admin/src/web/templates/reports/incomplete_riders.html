@@ -1,0 +1,78 @@
+{% extends 'templates_base/layout.html' %}
+
+{% block title %}
+    Jinetes con información incompleta
+{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center">Jinetes con información incompleta</h2>
+        </div>
+        <div class="col-md-12 text-center">
+            <div class="text-center mt-4">
+                {% if riders %}
+                    <a href="{{ url_for('reports.download_riders_without_full_information') }}" class="btn btn-success">
+                        Descargar (PDF)
+                    </a>
+                {% else %}
+                    <a href="#" class="btn btn-success disabled" tabindex="-1" aria-disabled="true">
+                        Descargar (PDF)
+                    </a>
+                {% endif %}
+                
+            </div>
+        </div>
+    </div>
+    
+
+    {% if riders %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Apellido</th>
+                    <th>Nombre</th>
+                    <th>DNI</th>
+                    <th>Datos de Discapacidad y Pensiones</th>
+                    <th>Datos de Situación Provisional y Escolar</th>
+                    <th>Datos de Tutores</th>
+                    <th>Datos de Trabajo Institucional</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rider in riders %}
+                <tr>
+                    <td>{{ rider.last_name }}</td>
+                    <td>{{ rider.first_name }}</td>
+                    <td>{{ rider.dni }}</td>
+                    <td>{{ rider.disability }}</td>
+                    <td>{{ rider.insurance }}</td>
+                    <td>{{ rider.tutors }}</td>
+                    <td>{{ rider.institutional_work }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    {% else %}
+    <div class="text-center">
+        <p class="text-center">No hay jinetes con información incompleta</p>
+    </div>
+        
+        
+    {% endif %}
+
+    
+    
+</div>
+
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('reports.index') }}" >◄ Volver</a>
+{% endblock %}

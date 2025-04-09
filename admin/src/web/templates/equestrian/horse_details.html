@@ -1,0 +1,196 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Registro de caballos{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    
+<h2>{{ horse.name }}</h2>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Información general</a>
+            </li>                
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('equestrian_details.horse_files', horse_id=horse.id) }}">Documentación</a>
+            </li> 
+        </ul>
+    </div>
+    <form method="POST" action="{{ url_for('equestrian_details.update_horse') }}" enctype="multipart/form-data">
+        <div style="text-align: center;">
+            <h8>Todos los campos con un (*) son obligatorios</h8>
+        </div>
+        <input type="hidden" name="horse_id" value="{{ horse.id }}">
+        
+        <div class="row">
+            <!-- Nombre -->
+            <div class="col-md-6 mb-3">
+                <label for="name" class="form-label">Nombre (*)</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ horse.name }}" required>
+            </div>
+    
+            <!-- Fecha de nacimiento -->
+            <div class="col-md-6 mb-3">
+                <label for="birth_date" class="form-label">Fecha de nacimiento (*)</label>
+                <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ horse.birth_date }}" required>
+            </div>
+    
+            <!-- Sexo -->
+            <div class="col-md-6 mb-3">
+                <label for="gender" class="form-label">Sexo (*)</label>
+                <select name="gender" id="gender" class="form-control" required>
+                    <option value="Macho" {% if horse.gender == "Macho" %}selected{% endif %}>Macho</option>
+                    <option value="Hembra" {% if horse.gender == "Hembra" %}selected{% endif %}>Hembra</option>
+                </select>
+            </div>
+    
+            <!-- Raza -->
+            <div class="col-md-6 mb-3">
+                <label for="breed" class="form-label">Raza (*)</label>
+                <input type="text" id="breed" name="breed" class="form-control" value="{{ horse.breed }}" required>
+            </div>
+    
+            <!-- Pelaje -->
+            <div class="col-md-6 mb-3">
+                <label for="fur" class="form-label">Pelaje (*)</label>
+                <input type="text" id="fur" class="form-control" name="fur" value="{{ horse.fur }}" required>
+            </div>
+    
+            <!-- Tipo de adquisición -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Condición (*)</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="acquisition_type" id="compra" value="Compra" {% if horse.acquisition_type == 'Compra' %}checked{% endif %} required>
+                    <label class="form-check-label" for="compra">Compra</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="acquisition_type" id="donacion" value="Donacion" {% if horse.acquisition_type == 'Donacion' %}checked{% endif %} required>
+                    <label class="form-check-label" for="donacion">Donación</label>
+                </div>
+                <div id="radio-error" style="color: red; display: none;">
+                    Por favor, seleccione un tipo de adquisición.
+                </div>
+            </div>
+    
+            <!-- Fecha de ingreso -->
+            <div class="col-md-6 mb-3">
+                <label for="entry_date" class="form-label">Fecha de ingreso (*)</label>
+                <input type="date" id="entry_date" class="form-control" name="entry_date" value="{{ horse.entry_date }}" required>
+            </div>
+    
+            <!-- Sede -->
+            <div class="col-md-6 mb-3">
+                <label for="sede" class="form-label">Selecciona la sede (*)</label>
+                <select name="sede" id="sede" class="form-control" required>
+                    <option value="CASJ" {% if horse.sede == "CASJ" %}selected{% endif %}>CASJ</option>
+                    <option value="HLP" {% if horse.sede == "HLP" %}selected{% endif %}>HLP</option>
+                    <option value="OTRO" {% if horse.sede == "OTRO" %}selected{% endif %}>OTRO</option>
+                </select>
+            </div>
+    
+            <!-- Conductor -->
+            <div class="col-md-6 mb-3">
+                <label for="conductor" class="form-label">Conductor a asignar (*)</label>
+                <select name="conductor" id="conductor" class="form-control" required>
+                    {% for conductor in conductores %}
+                        <option value="{{ conductor.id }}" {% if horse.conductor_id == conductor.id %}selected{% endif %}>
+                            {{ conductor.name }} {{ conductor.last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <!-- Entrenador -->
+            <div class="col-md-6 mb-3">
+                <label for="trainer" class="form-label">Entrenador a asignar (*)</label>
+                <select name="trainer" id="trainer" class="form-control" required>
+                    {% for entrenador in entrenadores %}
+                        <option value="{{ entrenador.id }}" {% if horse.trainer_id == entrenador.id %}selected{% endif %}>
+                            {{ entrenador.name }} {{ entrenador.last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <!-- Tipo de J&A -->
+            <div class="col-md-6 mb-3">
+                <label for="rider_type_select" class="form-label">Selecciona el tipo (*)</label>
+                <select name="rider_type" id="rider_type_select" class="form-control" required>
+                    <option value="Hipoterapia" {% if horse.rider_type == "Hipoterapia" %}selected{% endif %}>Hipoterapia</option>
+                    <option value="Monta Terapeutica" {% if horse.rider_type == "Monta Terapeutica" %}selected{% endif %}>Monta Terapeutica</option>
+                    <option value="Deporte Ecuestre Adaptado" {% if horse.rider_type == "Deporte Ecuestre Adaptado" %}selected{% endif %}>Deporte Ecuestre Adaptado</option>
+                    <option value="Actividades Recreativas" {% if horse.rider_type == "Actividades Recreativas" %}selected{% endif %}>Actividades Recreativas</option>
+                    <option value="Equitacion" {% if horse.rider_type == "Equitacion" %}selected{% endif %}>Equitacion</option>
+                </select>
+            </div>
+        </div>
+    
+        <!-- Botón Enviar -->
+        <div class="row">
+            <div class="col text-end">
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+            </div>
+        </div>
+    </form>
+        
+
+<script>
+    const birthDateInput = document.getElementById('birth_date');
+    const entryDateInput = document.getElementById('entry_date');
+
+    // Función para establecer el mínimo de entrada basado en la fecha de nacimiento y el máximo como la fecha actual
+    const setDateConstraints = () => {
+        const birthDate = birthDateInput.value; // Obtener el valor seleccionado
+        const currentDate = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+
+        // Establecer el máximo de la fecha de nacimiento como la fecha actual
+        birthDateInput.max = currentDate;
+
+        if (birthDate) {
+            entryDateInput.min = birthDate; // Configurar el mínimo basado en la fecha de nacimiento
+        }
+        entryDateInput.max = currentDate; // Configurar el máximo de la fecha de ingreso como la fecha actual
+    };
+
+    // Configurar el mínimo y máximo al cargar la página
+    birthDateInput.addEventListener('change', setDateConstraints);
+    
+    // Establecer el mínimo y máximo inicial si ya hay un valor cargado en birth_date
+    if (birthDateInput.value) {
+        setDateConstraints();
+    }
+
+    document.getElementById('submit-button').addEventListener('click', function (event) {
+        const radios = document.getElementsByName('acquisition_type');
+        let isChecked = false;
+
+        // Verificar si algún radio está seleccionado
+        for (const radio of radios) {
+            if (radio.checked) {
+                isChecked = true;
+                break;
+            }
+        }
+
+        // Mostrar u ocultar el mensaje de error según la selección
+        const errorMessage = document.getElementById('radio-error');
+        if (!isChecked) {
+            errorMessage.style.display = 'block';
+            event.preventDefault(); // Evitar el envío del formulario
+        } else {
+            errorMessage.style.display = 'none';
+        }
+    });
+</script>
+    
+    
+{% endblock %}
+
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('equestrian_dashboard.index') }}" >◄ Volver</a>
+{% endblock %}

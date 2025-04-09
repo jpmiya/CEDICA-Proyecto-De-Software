@@ -1,0 +1,99 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Creacion de usuarios{% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+
+
+
+    <h2>Registro de nuevo usuario</h2>
+    <form id="formulario_usuarios" method="POST" action="{{ url_for('user.new') }}">
+        <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+    
+        <div class="row">
+            <!-- Email -->
+            <div class="col mb-3">
+                <label for="email" class="form-label">Email (*)</label>
+                <input type="email" class="form-control" id="email"
+                       name="email" maxlength="100" required 
+                       placeholder="Ingrese su email" value="{{ params.get('email', '') }}">
+            </div>
+    
+            <!-- Contraseña -->
+            <div class="col mb-3">
+                <label for="password" class="form-label">Contraseña (*)</label>
+                <input type="password" class="form-control" id="password" 
+                       name="password" maxlength="100" required 
+                       placeholder="Ingrese su contraseña" value="{{ params.get('password', '') }}">
+            </div>
+    
+            <!-- Alias -->
+            <div class="col mb-3">
+                <label for="alias" class="form-label">Alias (*)</label>
+                <input type="text" class="form-control" id="alias" 
+                       name="alias" maxlength="100" required 
+                       placeholder="Ingrese un alias" value="{{ params.get('alias', '') }}">
+            </div>
+        </div>
+    
+        <!-- Roles -->
+        <div class="row">
+            <label for="roles" class="form-label">Roles (*)</label>
+            <div class="col mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="roles" value="Administracion" id="rol_administracion" 
+                           {% if 'Administracion' in params.get('roles', []) %}checked{% endif %}>
+                    <label class="form-check-label" for="rol_administracion">Administración</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="roles" value="Tecnica" id="rol_tecnica" 
+                           {% if 'Tecnica' in params.get('roles', []) %}checked{% endif %}>
+                    <label class="form-check-label" for="rol_tecnica">Técnica</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="roles" value="Ecuestre" id="rol_ecuestre" 
+                           {% if 'Ecuestre' in params.get('roles', []) %}checked{% endif %}>
+                    <label class="form-check-label" for="rol_ecuestre">Ecuestre</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="roles" value="Voluntariado" id="rol_voluntariado" 
+                           {% if 'Voluntariado' in params.get('roles', []) %}checked{% endif %}>
+                    <label class="form-check-label" for="rol_voluntariado">Voluntariado</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="roles" value="Editor" id="rol_editor" 
+                           {% if 'Editor' in params.get('roles', []) %}checked{% endif %}>
+                    <label class="form-check-label" for="rol_editor">Editor</label>
+                </div>
+                <div class="form-check">
+                    <p class="text-muted">Este usuario puede hacer todo</p>
+                    <input class="form-check-input" type="checkbox" name="sys_adm" value="sys_adm" id="sys_adm" 
+                           {% if params.get('sys_adm', False) %}checked{% endif %}>
+                    <label class="form-check-label" for="sys_adm">Es administrador del sistema </label>
+                </div>
+            </div>
+        </div>
+        
+    
+        <!-- Botón de envío -->
+        <div class="row text-end mt-4">
+
+            <div class="col-md-12">
+                <button type="reset" class="btn btn-secondary">Limpiar</button>
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </div>
+        </div>
+    </form>
+    
+    
+
+
+<script src="{{ url_for('static', filename='scripts/no-blank-pass.js') }}"></script>
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('user_dashboard.index') }}" >◄ Volver</a>
+{% endblock %}
+

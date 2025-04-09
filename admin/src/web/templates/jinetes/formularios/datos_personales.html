@@ -1,0 +1,207 @@
+<form class="needs-validation" id="datos_personales" action="{{ action_datos_personales }}" method="POST">
+    <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+    <!-- DNI -->
+    <div class="row">
+        <h5>Datos de Jinete/Amazona</h5>
+        <div class="col">
+            <label class="form-label">D.N.I (*)</label>
+            <input type="text" class="form-control" id="dni"
+                name="dni" placeholder="Ingrese el D.N.I. (Sólo números)"
+                minlength="8" maxlength="8"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                title="El D.N.I. debe tener exactamente 8 dígitos y sólo contener números." 
+                pattern="\d{8}" required value="{{ params.get('dni', '') }}" />
+        </div>
+    </div>
+    <div class="row">
+        <!-- Nombre -->
+        <div class="col">
+            <label for="name" class="form-label">Nombre/s (*)</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Nombre" 
+                    title="Solo se permiten letras, apóstrofes entre dos letras y un espacio entre dos nombres" 
+                    maxlength="50" pattern="^([A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:'[A-Za-zÁÉÍÓÚáéíóúÑñ])?\s?)*[A-Za-zÁÉÍÓÚáéíóúÑñ]+$"
+                    value="{{ params.get('name', '') }}" required/>
+        </div>
+        <!-- Apellido -->
+        <div class="col">
+            <label for="last_name" class="form-label">Apellido (*)</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Apellido" 
+            title="Solo se permiten letras, apóstrofes entre dos letras y un espacio entre dos nombres" 
+            maxlength="50" pattern="^([A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:'[A-Za-zÁÉÍÓÚáéíóúÑñ])?\s?)*[A-Za-zÁÉÍÓÚáéíóúÑñ]+$" 
+                    value="{{ params.get('last_name', '') }}" required/>
+        </div>
+    </div>
+
+    <!-- Lugar de nacimiento -->
+    <div class="row">
+        <h5>Datos de nacimiento</h5>
+        <!--FEcha de nacimiento-->
+        <div class="col">
+            <label for="birthday" class="form-label">Fecha de nacimiento (*)</label>
+            <input type="date" class="form-control" id="birthday" name="birthday" 
+                    value="{{ params.get('birthday', '') }}" required/>
+        </div>
+        <!--Provincia de nacimiento-->
+        <div class="col">
+            <label for="province" class="form-label">Provincia de nacimiento (*)</label>
+            <select id="province" name="province" class="form-control" required>
+                <option value="">Seleccione una provincia</option>
+                {% set provincias = [
+                    "Buenos Aires", "Ciudad Autónoma de Buenos Aires", "Catamarca", "Chaco", 
+                    "Chubut", "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", 
+                    "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro", 
+                    "Salta", "San Juan", "San Luis", "Santa Cruz", "Santa Fe", 
+                    "Santiago del Estero", "Tierra del Fuego", "Tucumán"
+                ] %}
+                {% for option in provincias %}
+                    <option value="{{ option }}" {% if option == params.get('province', '') %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <!--Localidad de nacimiento-->
+        <div class="col">
+            <label for="locality" class="form-label">Localidad de nacimiento(*)</label>
+            <input type="text" class="form-control" id="locality" name="locality" maxlength="100"
+            title="La localidad debe contener solo letras, números, espacios y los caracteres ' (apóstrofe) y . (punto), pero no pueden aparecer consecutivamente ni al inicio o al final. Ejemplo: 'Comuna 11', 'Jeppener', 'Gral. O'higgings'."
+            pattern="^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+(?:['.][a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+)*(?:\s[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+(?:['.][a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+)*)*$"
+                value="{{ params.get('locality', '') }}" required/>
+        </div>
+    </div>
+
+    <!--Datos domicilio actual linea 1-->
+    <div class="row">
+        <h5>Datos de domicilio actual</h5>
+        <!--Provincia domicilio actual-->
+        <div class="col">
+            <label for="province_address" class="form-label">Provincia de domicilio (*)</label>
+            <select id="province_address" name="province_address" class="form-control" required>
+                <option value="">Seleccione una provincia</option>
+                {% for option in provincias %}
+                    <option value="{{ option }}" {% if option == params.get('province_address', '') %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <!--Localidad domicilio actual-->
+        <div class="col">
+            <label for="locality_address" class="form-label">Localidad de domicilio (*)</label>
+            <input type="text" class="form-control" id="locality_address" name="locality_address" maxlength="100"
+            title="La localidad debe contener solo letras, números, espacios y los caracteres ' (apóstrofe) y . (punto), pero no pueden aparecer consecutivamente ni al inicio o al final. Ejemplo: 'Comuna 11', 'Jeppener', 'Gral. O'higgings'."
+            pattern="^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+(?:['.][a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+)*(?:\s[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+(?:['.][a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+)*)*$"
+                value="{{ params.get('locality_address', '')}}" required/>
+        </div>
+    </div>
+
+    <!--Datos domicilio actual linea 2-->
+    <div class="row">
+        <!--Calle domicilio actual-->
+        <div class="col">
+            <label for="street" class="form-label">Calle de domicilio (*)</label>
+            <input type="text" class="form-control" id="street" name="street" maxlength="100"
+            title="La calle debe contener solo letras, números, espacios y los caracteres ' (apóstrofe), . (punto) y ° (grado), pero no pueden aparecer consecutivamente ni al inicio o al final. Ejemplo: '50 123', 'Avenida 9 de Julio', 'San Martín y Belgrano'."
+
+            pattern="^[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+(?:['.°][a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+)*(?:\s[a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+(?:['.°][a-zA-ZÁÉÍÓÚáéíóúÑñ0-9]+)*)*$"
+                value="{{ params.get('street', '') }}" required/>
+        </div>
+        <!--Numero de casa domicilio actual-->
+        <div class="col">
+            <label for="house_num" class="form-label">Número de domicilio (*)</label>
+            <input type="number" class="form-control" id="house_num" name="house_num" required
+                value="{{ params.get('house_num', '') }}" min="0" max="{{ get_max_number() }}"/>
+        </div>
+        <!-- Departamento de domicilio actual-->
+        <div class="col">
+            <label for="dpto" class="form-label">Departamento (opcional)</label>
+            <input type="text" class="form-control" id="dpto" name="dpto" maxlength="3"
+                title="El departamento, que puede incluir letras, números y un espacio entre caracteres. Máximo 3 caracteres."
+                pattern="^[A-Za-z0-9 ]{1,3}$"
+                value="{{ params.get('dpto', '') }}"/>
+        </div>
+    </div>
+
+    <!-- Contacto actual y de emergencia -->
+    <div class="row">
+        <h5>Datos de contacto</h5>
+        <!-- Teléfono actual -->
+        <div class="col">
+            <label for="actual_tel" class="form-label">Teléfono actual (*)</label>
+            <input type="text" class="form-control" id="actual_tel" name="actual_tel"
+            title="Sólo ingrese 10 números, nada de '+', '-' u otros símbolos"
+            
+            maxlength="10" minlength="10" pattern="\d{10}" required value="{{ params.get('actual_tel', '') }}"/>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Contacto de emergencia -->
+        <!--Nombre-->
+        <div class="col">
+            <label for="emergency_contact_name" class="form-label">Nombre de contacto de emergencia (*)</label>
+            <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" placeholder="Nombre de contacto de emergencia" required
+            pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s.,'-]{1,100}$"
+            title="El nombre debe contener solo letras, espacios, y los caracteres . , ' - . Máximo 100 caracteres." 
+            value="{{ params.get('emergency_contact_name', '') }}"/>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Teléfono de emergencia-->
+        <div class="col">
+            <label for="emergency_contact_tel" class="form-label">Contacto de emergencia (*)</label>
+            <input type="text" class="form-control" id="emergency_contact_tel" name="emergency_contact_tel" 
+                maxlength="10" minlength="10" pattern="\d{10}" required
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                title="Sólo ingrese 10 números, nada de '+', '-' u otros símbolos" 
+                value="{{ params.get('emergency_contact_tel', '') }}"/>
+        </div>
+        
+    </div>
+
+    
+    <div class="row">
+        <label class="form-label">¿Es becado? (*)</label>
+        <div class="custom_radio">
+            <label>
+                <input type="radio" name="scholarship_holder" value="yes" required
+                {% if params.get("scholarship_holder", '') == "yes" %}checked{% endif %}/>
+                <span>Sí</span>
+            </label>
+            <label>
+                <input type="radio" name="scholarship_holder" value="no"
+                {% if params.get("scholarship_holder", "") == "no" %}checked{% endif %}/>
+                <span>No</span>
+            </label>
+        </div>
+    </div>
+    
+    
+    <div class="row">
+        <label for="rider_observations" class="form-label">Observaciones (opcional)</label>
+            <textarea
+            class="form-control"
+            id="rider_observations"
+            name="rider_observations" 
+            rows="3"
+            title="Máximo 256 caracteres"
+            maxlength="256">{{ params.get('rider_observations', '') }}</textarea>
+    </div>
+    
+
+    {% if check_permission('rider_create') or check_permission('rider_update') %}
+        <div class="row text-end">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelRegistry">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    {% endif %}
+</form>
+<script>
+    
+    const birthdayInput = document.getElementById('birthday');
+
+    // Obtener la fecha actual en la zona horaria local
+    const currentDate = new Date();
+    const localDate = currentDate.toLocaleDateString('en-CA'); // con la de argentina me deja hasta infinito
+    
+    birthdayInput.max = localDate;
+
+</script>

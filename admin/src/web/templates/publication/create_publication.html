@@ -1,0 +1,67 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Formulario de Publicaciones{% endblock %}
+<head>
+    {% block navbar%}
+    {% include "templates_base/navbar.html" %}
+    {% endblock %}
+</head>
+{% block content %}
+<div class="form-container">
+    <div class="form-box">
+        <h1>Formulario de Publicaciones</h1>
+
+        <form method="POST" action="{{ url_for('publication.create') }}">
+            <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+            <div class="mb-3">
+                <label for="title" class="form-label">Título (*):</label>
+                <input type="text" id="title" name="title" maxlength="100" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="summary" class="form-label">Resumen (o Copete (*)):</label>
+                <textarea id="summary" name="summary" maxlength="255" class="form-control" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Contenido: (*)</label>
+                <textarea id="content" name="content" class="form-control" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="state" class="form-label">Estado (*):</label>
+                <select id="state" name="state" class="form-control">
+                    <option value="Borrador">Borrador</option>
+                    <option value="Publicado">Publicado</option>
+                    <option value="Archivado">Archivado</option>
+                </select>
+            </div>
+
+            {% if is_admin() %}
+            <div class="mb-3">
+                <label for="author" class="form-label">Autor (*):</label>
+                <select id="author" name="author" class="form-control">
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.alias }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="row text-end">
+                <div class="col text-end">
+                    <button type="submit" class="btn btn-primary">Crear publicacion</button>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+</div>
+
+<script>
+    CKEDITOR.replace('content');
+</script>
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('publication_dashboard.index') }}">◄ Volver</a>
+{% endblock %}

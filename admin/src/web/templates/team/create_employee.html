@@ -1,0 +1,260 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Formulario de Empleados{% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+
+    <h1>Formulario de Empleados</h1>
+    <form method="POST" action="{{ url_for('team.create') }}" enctype="multipart/form-data">
+        <p class="text-muted">* Todos los campos marcados con (*) son obligatorios.</p>
+        
+        <!-- Información básica -->
+        <h3 class="mb-3">Información básica</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="dni" class="form-label">DNI (*)</label>
+                <input type="text" class="form-control" id="dni" name="dni" maxlength="8" 
+                    placeholder="Ingrese el DNI" 
+                    value="{{ dni }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="name" class="form-label">Nombre (*)</label>
+                <input type="text" class="form-control" id="name" name="name" maxlength="50" 
+                    placeholder="Ingrese el nombre" 
+                    value="{{ name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="last_name" class="form-label">Apellido (*)</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" maxlength="50" 
+                    placeholder="Ingrese el apellido" 
+                    value="{{ last_name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email (*)</label>
+                <input type="email" class="form-control" id="email" name="email" maxlength="50" 
+                    placeholder="Ingrese el email" 
+                    value="{{ email }}" required>
+            </div>
+        </div>
+    
+        <!-- Datos de contacto -->
+        <h3 class="mb-3">Datos de contacto</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="telephone" class="form-label">Teléfono (*)</label>
+                <input type="text" class="form-control" id="telephone" name="telephone" maxlength="15" 
+                    placeholder="Ingrese el teléfono" required>
+                <small class="form-text text-muted">Deben ser 10 dígitos y solo números</small>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="locality" class="form-label">Localidad (*)</label>
+                <input type="text" class="form-control" id="locality" name="locality" maxlength="50" 
+                    placeholder="Ingrese la localidad" 
+                    value="{{ locality }}" required>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="address" class="form-label">Dirección (*)</label>
+                <input type="text" class="form-control" id="address" name="address" maxlength="50" 
+                    placeholder="Ingrese la dirección" 
+                    value="{{ address }}" required>
+            </div>
+        </div>
+    
+        <!-- Profesión y puesto -->
+        <h3 class="mb-3">Profesión y puesto</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="profession" class="form-label">Profesión (*)</label>
+                <select class="form-control" id="profession" name="profession" required>
+                    <option value="" disabled {% if not profession %}selected{% endif %}>Seleccione una profesión</option>
+                    <option value="Psicologo/a" {% if profession == 'Psicologo/a' %}selected{% endif %}>Psicólogo/a</option>
+                    <option value="Psicomotricista" {% if profession == 'Psicomotricista' %}selected{% endif %}>Psicomotricista</option>
+                    <option value="Medico/a" {% if profession == 'Medico/a' %}selected{% endif %}>Médico/a</option>
+                    <option value="Kinesiologo/a" {% if profession == 'Kinesiologo/a' %}selected{% endif %}>Kinesiólogo/a</option>
+                    <option value="Terapista Ocupacional" {% if profession == 'Terapista Ocupacional' %}selected{% endif %}>Terapista Ocupacional</option>
+                    <option value="Psicopedagogo/a" {% if profession == 'Psicopedagogo/a' %}selected{% endif %}>Psicopedagogo/a</option>
+                    <option value="Docente" {% if profession == 'Docente' %}selected{% endif %}>Docente</option>
+                    <option value="Profesor/a" {% if profession == 'Profesor/a' %}selected{% endif %}>Profesor/a</option>
+                    <option value="Fonoaudiologo/a" {% if profession == 'Fonoaudiologo/a' %}selected{% endif %}>Fonoaudiólogo/a</option>
+                    <option value="Veterinario/a" {% if profession == 'Veterinario/a' %}selected{% endif %}>Veterinario/a</option>
+                    <option value="Otra" {% if profession == 'Otra' %}selected{% endif %}>Otra</option>
+
+            
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="job_position" class="form-label">Puesto de trabajo (*)</label>
+                <select class="form-control" id="job_position" name="job_position" required>
+                    <option value="" disabled {% if not job_position %}selected{% endif %}>Seleccione un puesto</option>
+                    <option value="Administrativo/a" {% if job_position == 'Administrativo/a' %}selected{% endif %}>Administrativo/a</option>
+                    <option value="Terapeuta" {% if job_position == 'Terapeuta' %}selected{% endif %}>Terapeuta</option>
+                    <option value="Conductor" {% if job_position == 'Conductor' %}selected{% endif %}>Conductor</option>
+                    <option value="Auxiliar de pista" {% if job_position == 'Auxiliar de pista' %}selected{% endif %}>Auxiliar de pista</option>
+                    <option value="Herrero" {% if job_position == 'Herrero' %}selected{% endif %}>Herrero</option>
+                    <option value="Veterinario" {% if job_position == 'Veterinario' %}selected{% endif %}>Veterinario</option>
+                    <option value="Entrenador de Caballos" {% if job_position == 'Entrenador de Caballos' %}selected{% endif %}>Entrenador de Caballos</option>
+                    <option value="Domador" {% if job_position == 'Domador' %}selected{% endif %}>Domador</option>    
+                    <option value="Profesor de Equitacion" {% if job_position == 'Profesor de Equitacion' %}selected{% endif %}>Profesor de Equitación</option>
+                    <option value="Docente de Capacitacion" {% if job_position == 'Docente de Capacitacion' %}selected{% endif %}>Docente de Capacitación</option>
+                    <option value="Auxiliar de mantenimiento" {% if job_position == 'Auxiliar de mantenimiento' %}selected{% endif %}>Auxiliar de mantenimiento</option>
+                    <option value="Otra" {% if job_position == 'Otra' %}selected{% endif %}>Otra</option>
+
+
+                </select>
+            </div>
+        </div>
+    
+        <!-- Fechas de actividad -->
+        <h3 class="mb-3">Fechas de actividad</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="start_date" class="form-label">Fecha de inicio</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" 
+                    max="2100-12-31" value="{{ start_date }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="end_date" class="form-label">Fecha de finalización</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" 
+                    max="2100-12-31" value="{{ end_date }}">
+            </div>
+        </div>
+    
+        <!-- Contacto de emergencia -->
+        <h3 class="mb-3">Contacto de emergencia</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="emergency_contact_name" class="form-label">Nombre (*)</label>
+                <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" maxlength="50" 
+                    placeholder="Nombre del contacto" 
+                    value="{{ emergency_contact_name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="emergency_contact_num" class="form-label">Teléfono (*)</label>
+                <input type="text" class="form-control" id="emergency_contact_num" name="emergency_contact_num" maxlength="15" 
+                    placeholder="Teléfono del contacto" 
+                    value="{{ emergency_contact_num }}" required>
+                <small class="form-text text-muted">Deben ser 10 dígitos y solo números</small>
+            </div>
+        </div>
+        
+        <h3 class="mb-3">Obra social</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="emergency_contact_name" class="form-label">Obra social (*):</label>
+                <input type="text" class="form-control" id="social_insurance" name="social_insurance" maxlength="50"
+                    placeholder="Nombre de la empresa" value="{{ social_insurance }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="affiliate_num" class="form-label">Numero de afiliado (*):</label>
+                <input type="text" class="form-control" id="affiliate_num" name="affiliate_num" maxlength="20"
+                    placeholder="Numero de afiliado" value="{{ affiliate_num }}" required>
+            </div>
+        </div>
+
+        <!-- Condición -->
+        
+        <div class="row">
+            <div class="col-md-6 mb-3 text-center">
+                <h3 class="mb-3">Condición (*)</h3>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="condition" id="inlineRadio1" value="Voluntario" 
+                        {% if condition == 'Voluntario' %}checked{% endif %} required>
+                    <label class="form-check-label" for="inlineRadio1">Voluntario</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="condition" id="inlineRadio2" value="Personal Rentado" 
+                        {% if condition == 'Personal Rentado' %}checked{% endif %} required>
+                    <label class="form-check-label" for="inlineRadio2">Personal Rentado</label>
+                </div>
+                <div id="radio-error" style="color: red; display: none;">
+                    Por favor, seleccione un tipo de adquisición.
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3 text-center">
+                <!-- Está activo -->
+                <h3 class="mb-3">¿Está activo? (*)</h3>
+                <div class="row">
+                    <div class="col-md-12">
+                        <select class="form-select" name="active" required>
+                            <option value="" disabled selected>Seleccione una opción</option>
+                            <option value="true">SI</option>
+                            <option value="false">NO</option>
+                        </select>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <!-- Botones -->
+        <div class="text-end">
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+            <button type="submit" id="submit-button" class="btn btn-primary">Registrar</button>
+        </div>
+    </form>
+<!--<script src="{{ url_for('static', filename='scripts/date-validators.js') }}"></script>-->
+
+<script>
+    document.getElementById('submit-button').addEventListener('click', function (event) {
+        const radios = document.getElementsByName('condition');
+        let isChecked = false;
+
+        // Verificar si algún radio está seleccionado
+        for (const radio of radios) {
+            if (radio.checked) {
+                isChecked = true;
+                break;
+            }
+        }
+
+        // Mostrar u ocultar el mensaje de error según la selección
+        const errorMessage = document.getElementById('radio-error');
+        if (!isChecked) {
+            errorMessage.style.display = 'block';
+            event.preventDefault(); // Evitar el envío del formulario
+        } else {
+            errorMessage.style.display = 'none';
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const currentDate = new Date();
+    const localDate = currentDate.toLocaleDateString('en-CA'); // con la de argentina me deja hasta infinito
+    startDateInput.max = localDate;
+    endDateInput.min = localDate;
+    // Evento para cuando la fecha de inicio cambia
+    startDateInput.addEventListener('input', () => {
+        const startDate = new Date(startDateInput.value);
+        if (!isNaN(startDate)) {
+            endDateInput.min = startDate.toISOString().split('T')[0]; // Actualiza el mínimo de la fecha de finalización
+        }
+    });
+
+    // Evento para cuando la fecha de finalización cambia
+    endDateInput.addEventListener('input', () => {
+        const endDate = new Date(endDateInput.value);
+        if (!isNaN(endDate)) {
+            startDateInput.max = endDate.toISOString().split('T')[0]; // Actualiza el máximo de la fecha de inicio
+        }
+    });
+
+
+});
+
+</script>
+
+
+{% endblock %}
+
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('team_dashboard.index') }}" >◄ Volver</a>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Aceptar usuario {% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+    <h2 class="text-center mb-4">Aceptar usuario</h2>
+    <h6>{{ params.get('email') }}</h6>
+    <form action="{{ url_for('pending_users.accept_user', user_id=user_id) }}" method="POST">
+        <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+        <div class="form-group">
+            <label for="title">Alias del nuevo usuario (*) </label>
+            <input type="text" class="form-control" id="alias" value="{{ params.get("alias", "") }}"
+            name="alias" placeholder="Escribe el alias" required>
+        </div>
+        <div class="form-group">
+            <label for="rol">Rol asignado:</label>
+            <input 
+                type="text" 
+                id="rol" 
+                value="Voluntariado" 
+                readonly 
+                disabled 
+                style="cursor: not-allowed;"
+            >
+            <div 
+                style="
+                    font-size: 0.80em; 
+                    color: #666; 
+                    margin-top: 3px;
+                    border-radius: 4px; 
+                    padding: 5px;
+                "
+            >
+                El usuario se registrará con este rol. Un administrador del sistema podrá cambiarlo después
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="active"> Estado </label>
+            <input 
+                type="text" 
+                id="active" 
+                value="BLOQUEADO" 
+                readonly 
+                disabled 
+                style="cursor: not-allowed;"
+            >
+            <div 
+                style="
+                    font-size: 0.80em; 
+                    color: #666; 
+                    margin-top: 3px;
+                    border-radius: 4px; 
+                    padding: 5px;
+                "
+            >
+                El usuario se registrará bloqueado. Un administrador del sistema podrá cambiarlo después
+            </div>
+            <input type="hidden" name="pending_user_id" id="pending_user_id" value="{{ user_id }}">
+
+        </div>
+        <a href="{{ url_for('pending_users.index') }}" class="btn btn-danger">Cancelar</a>
+        <button type="submit" class="btn btn-primary w-100 mt-4">Aceptar nuevo usuario</button>
+    </form>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('pending_users.index') }}" >◄ Volver</a>
+{% endblock %}

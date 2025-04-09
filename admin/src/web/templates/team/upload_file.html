@@ -1,0 +1,66 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Subir documento de Empleado {% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    
+<h4>Empleado: {{ employee.name }} {{ employee.last_name }}</h4>
+<h2 class="text-center mb-4">Subir Documento</h2>
+<form action="{{ url_for('team_details.upload_document', employee_id=employee_id) }}" method="POST" enctype="multipart/form-data">
+    <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+    <div class="form-group">
+        <label for="title">Título del Documento (*)</label>
+        <input type="text" class="form-control" id="title" name="title" placeholder="Escribe el título" required>
+    </div>
+
+    <div class="form-group mt-3">
+        <label for="document">Documento (*)</label>
+        <div class="custom-file text-center" >
+            <input type="file" class="custom-file-input" id="document" name="document" accept=".pdf, .doc, .docx, .xls, .xlsx, .jpeg, .jpg" required>
+            <label class="custom-file-label" id="file-label" for="document">Seleccione un documento</label>
+        </div>
+    </div>
+    
+    <button type="submit" class="btn btn-primary w-100 mt-4">Subir Documento</button>
+</form>
+
+
+<script>
+    // Mostrar el nombre del archivo seleccionado
+    document.querySelector('.custom-file-input').addEventListener('change', function (e) {
+        var fileName = document.getElementById("document").files[0].name;
+        var nextSibling = document.getElementById("file-label");
+        nextSibling.innerText = fileName;
+    });
+
+    // Drag and drop funcionalidad para cambiar el archivo
+    var fileInput = document.getElementById('document');
+    var formGroup = fileInput.closest('.form-group');
+
+    formGroup.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        formGroup.classList.add('dragging');
+    });
+
+    formGroup.addEventListener('dragleave', function (e) {
+        formGroup.classList.remove('dragging');
+    });
+
+    formGroup.addEventListener('drop', function (e) {
+        e.preventDefault();
+        formGroup.classList.remove('dragging');
+        fileInput.files = e.dataTransfer.files;
+        var fileName = fileInput.files[0].name;
+        document.getElementById("file-label").innerText = fileName;
+    });
+</script>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('team.show_documentation', employee_id=employee_id, page=1) }}" >◄ Volver</a>
+{% endblock %}

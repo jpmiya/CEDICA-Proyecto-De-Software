@@ -1,0 +1,52 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Modificar usuario{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2>Modificar Perfil de Usuario</h2>
+                </div>
+                
+                <form method="POST" action="{{ url_for('user.update_user') }}">
+                    <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+                    <!-- Campo oculto para el ID del usuario -->
+                    <input type="hidden" name="id" value="{{ user.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email (*)</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="alias" class="form-label">Alias (*)</label>
+                        <input type="text" class="form-control" id="alias" name="alias" value="{{ user.alias }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Nueva Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Dejar en blanco si no desea cambiarla">
+                    </div>
+                    
+                    <div class="col-12 text-end">
+                        <a href="{{ url_for('user.profile', user_id=user.id) }}" class="btn btn-danger">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('user.profile', user_id = session['id']) }}" >◄ Volver</a>
+{% endblock %}

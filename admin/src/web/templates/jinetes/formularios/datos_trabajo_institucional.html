@@ -1,0 +1,178 @@
+<form id="formulario_trabajo" action="{{ action_trabajo_institucional }}" method="post">
+    <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+    <!-- Propuesta de trabajo -->
+    <div class="row">
+
+        <div class="col-md-8">
+            <label>Propuesta de trabajo (*)</label>
+            <select id="proposal" name="proposal" class="form-control" required>
+                <option value="">Seleccione una actividad</option>
+                <option value="Hipoterapia" {% if params.get('proposal', '') == 'Hipoterapia' %}selected{% endif %}>Hipoterapia</option>
+                <option value="Monta Terapeutica" {% if params.get('proposal', '') == 'Monta Terapeutica' %}selected{% endif %}>Monta Terapéutica</option>
+                <option value="Deporte Ecuestre Adaptado" {% if params.get('proposal', '') == 'Deporte Ecuestre Adaptado' %}selected{% endif %}>Deporte Ecuestre Adaptado</option>
+                <option value="Actividades Recreativas" {% if params.get('proposal', '') == 'Actividades Recreativas' %}selected{% endif %}>Actividades Recreativas</option>
+                <option value="Equitacion" {% if params.get('proposal', '') == 'Equitacion' %}selected{% endif %}>Equitación</option>
+            </select>
+        </div>
+        <!--Sede-->
+        <div class="col-md-4">
+            <label>Sede(*)</label>
+            <div class="custom_radio">
+                <label>
+                    <input type="radio" name="headquarters" value="CASJ"
+                    {% if params.get('headquarters', '') == "CASJ" %} checked {% endif %} required>
+                    <span>CASJ</span>
+                </label>
+                <label>
+                    <input type="radio" name="headquarters" value="HLP" 
+                    {% if params.get('headquarters', '') == 'HLP' %}checked{% endif %}>
+                    <span>HLP</span>
+                </label>
+                <label>
+                    <input type="radio" name="headquarters" value="OTRO" 
+                    {% if params.get('headquarters', '') == 'OTRO' %}checked{% endif %}>
+                    <span>OTRO</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <!-- Dias de la semana -->
+    <div class="row">
+        <label>Indique los días de la semana de trabajo (*)</label>
+        <div class="form-group">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="monday" 
+                        name="days_of_the_week" value="monday" 
+                {% if params.get("monday") %} checked {% endif %}>
+                <label class="form-check-label" for="monday">Lunes</label>
+            </div>
+        
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="tuesday" 
+                name="days_of_the_week" value="tuesday" 
+                {% if params.get("tuesday") %}checked{% endif %}>
+                <label class="form-check-label" for="tuesday">Martes</label>
+            </div>
+        
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="wednesday"
+                name="days_of_the_week" value="wednesday" 
+                {% if params.get("wednesday") %}checked{% endif %}>
+                <label class="form-check-label" for="wednesday">Miércoles</label>
+            </div>
+        
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="thursday" 
+                name="days_of_the_week" value="thursday" 
+                {% if params.get("thursday") %}checked{% endif %}>
+                <label class="form-check-label" for="thursday">Jueves</label>
+            </div>
+        
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="friday" 
+                name="days_of_the_week" value="friday" 
+                {% if params.get("friday") %}checked{% endif %}>
+                <label class="form-check-label" for="friday">Viernes</label>
+            </div>
+        
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="saturday" 
+                name="days_of_the_week" value="saturday" 
+                {% if params.get("saturday") %}checked{% endif %}>
+                <label class="form-check-label" for="saturday">Sábado</label>
+            </div>
+        
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="sunday"
+                name="days_of_the_week" value="sunday" 
+                {% if params.get("sunday") %}checked{% endif %}>
+                <label class="form-check-label" for="sunday">Domingo</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profesor/ terapeuta -->
+        <div class="col-md-6">
+            <label>Seleccione un Profesor/a Terapeuta (*)</label>
+            <select name="teacher_therapist" class="form-select" required>
+                <option value="">Escoja un profesional</option>
+                {% for employee in teachers_therapists %}
+                <option value="{{ employee.id }}" 
+                    {% if params.get('teacher_therapist_id')|int == employee.id %}selected{% endif %}>
+                    {{ employee.name }} {{ employee.last_name }} - DNI: {{ employee.dni }}
+                </option>
+                {% else %}
+                <option disabled>No se encontraron empleados activos</option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        <!-- Conductor del caballo -->
+        <div class="col-md-6">
+            <label>Seleccione un Conductor/a del caballo (*)</label>
+            <select name="horse_riders" class="form-select" required>
+                <option value="">Escoja un profesional</option>
+                {% for employee in horse_riders %}
+                <option value="{{ employee.id }}" 
+                    {% if params.get('horse_rider_id')|int == employee.id %}selected{% endif %}>
+                    {{ employee.name }} {{ employee.last_name }} - DNI: {{ employee.dni }}
+                </option>
+                {% else %}
+                <option disabled>No se encontraron empleados activos</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <!-- Caballo -->
+        <div class="col-md-6">
+            <label>Seleccione un caballo (*)</label>
+            <select name="horse" class="form-select" id="horse" data-preselected-id="{{ params.get('horse_id') }}" required>
+                <option value="">Seleccione un Caballo</option>
+                {% for horse in horses %}
+                <option value="{{ horse.id }}" 
+                    {% if params.get('horse_id')|int == horse.id %}selected{% endif %}>
+                    {{ horse.name }} ► Sede: {{ horse.sede }}
+                </option>
+                {% endfor %}
+            </select>
+            
+        </div>
+        
+        <!-- Auxiliar de pista -->
+        <div class="col-md-6">
+            <label>Seleccione un auxiliar de pista (*)</label>
+            <select name="track_assistant" class="form-select" required>
+                <option value="">Seleccione un auxiliar de pista</option>
+                {% for employee in track_assistants %}
+                
+
+                <option value="{{ employee.id }}" 
+                {% if params.get('track_assistant_id')|int == employee.id %}selected{% endif %}>
+                    {{ employee.name }} {{ employee.last_name }} - DNI: {{ employee.dni }}
+                </option>
+                {% else %}
+                <option disabled>No se encontraron empleados activos</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <hr>
+    {% if check_permission('rider_create') or check_permission('rider_update') %}
+
+        <div class="row">
+            <div class="col-md-12 text-end">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelRegistry">Cancelar</button>
+            
+                <button id="submit" type="submit" value="Guardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    {% endif %}
+</form>
+
+
+<script src="{{ url_for('static', filename='scripts/institutional-work.js') }}"></script>

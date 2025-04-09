@@ -1,0 +1,210 @@
+{% extends "templates_base/layout.html" %}
+{% block title %}Panel de Empleados{% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+
+<h1>Detalles de {{ employee.name }} {{ employee.last_name }} </h1>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link " aria-current="page" href="{{ url_for('team_details.index', employee_id = employee.id) }}">Información general</a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('team.show_documentation', employee_id = employee.id, page = 1) }}">Documentación</a>
+            </li> 
+        </ul>
+    </div>
+    <input type="hidden" name="page" id="page" value="{{ pagination.page }}">
+    <div class="container-fluid py-3">
+        <div class="row justify-content-center g-3">
+            <div class="col-auto">
+                <a class="btn btn-secondary btn-lg" href="{{ url_for('team_details.show_upload_link', employee_id = employee.id) }}">
+                    Subir nuevo enlace
+                </a>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-primary btn-lg" href="{{ url_for('team_details.upload_document', employee_id = employee.id) }}">
+                    Subir nuevo documento
+                </a>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% if not documents %}
+            <div class="col-md-12 text-center" style="justify-content: center;">
+                <div class="alert alert-warning">
+                    No hay documentos cargados sobre el empleado.
+                </div>
+            </div>
+        {% else %}
+            {% for document in documents %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            
+                            <h5 class="card-title text-center">{{ document.title }}</h5>
+                            <p class="card-text">Tipo de archivo: {{ document.get_file_type() }}</p>
+                            {% if document.format == 'link' %}
+                                <a class="btn btn-info mb-2" href="{{ document.source }}" target="_blank">Ir a archivo</a>
+                            {% else %}
+                                <button type="button" class="btn btn-info mb-2" onclick="downloadFile('{{ document.id }}', '{{ employee.id }}')">Descargar</button>
+                            {% endif %}
+                            {% if check_permission('team.update') %}
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-warning" onclick="updateFile('{{ document.id }}', '{{ employee.id }}', '{{ document.title|escape }}')">Modificar</button>
+                                    <button type="button" class="btn btn-danger" 
+                                            onclick="deleteDocument('{{ document.id }}', '{{ employee.id }}')">
+                                        Eliminar
+                                    </button>
+
+                                </div>
+                            {% endif %}
+                            
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% if documents %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('team.show_documentation', employee_id=employee.id, page=pagination.prev_num) }}" aria-label="Página previa">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{
+                        pagination.pages }}</a></li>
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('team.show_documentation', employee_id=employee.id, page=pagination.next_num) }}" aria-label="Página siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+    <!-- Modal de modificar -->
+    <div class="modal fade" id="updateFileModal" tabindex="-1" aria-labelledby="updateFileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateFileModalLabel">Actualizar título del archivo (*)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateFileForm" method="POST">
+                        <input type="hidden" name="document_id" id="modalDocumentId">
+                        <input type="hidden" name="id" id="modalEmployeeId">
+                        <input type="hidden" name="page" id="modalPage">
+                        <div class="mb-3">
+                            <label for="modalTitle" class="form-label">Nuevo título:</label>
+                            <input type="text" class="form-control" id="modalTitle" name="title" maxlength="30" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="submitModalForm()">Actualizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal de eliminar -->
+    <div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFileModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                    <div class="modal-body">
+                        <p>¿Estás seguro de que quieres eliminar este archivo? Esto es <strong>irreversible</strong>.</p>
+                        <!-- Inputs ocultos para enviar datos -->
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form method="POST" action="{{ url_for('team_details.delete_document') }}">
+                            <input type="hidden" name="document_id" id="deleteDocumentId">
+                            <input type="hidden" name="id" id="deleteEmployeeId">
+                            <input type="hidden" name="page" id="deletePage">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </div>
+                
+            </div>
+        </div>
+    </div>
+    
+
+<script>
+    function downloadFile(documentId, employeeId) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = " {{ url_for('team_details.download_employee_files') }} ";
+        const input = document.createElement('input');
+        const input2 = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'document_id';
+        input.value = documentId;
+        input2.type = 'hidden';
+        input2.name = 'employee_id';
+        input2.value = employeeId;
+
+        form.appendChild(input);
+        form.appendChild(input2);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+
+    function updateFile(documentId, employeeId, currentTitle) {
+        // Configurar valores en el formulario dentro del modal
+        document.getElementById('modalDocumentId').value = documentId;
+        document.getElementById('modalEmployeeId').value = employeeId;
+        document.getElementById('modalPage').value = document.getElementById('page').value;
+        document.getElementById('modalTitle').value = currentTitle; // Precargar el título actual
+
+        // Mostrar el modal de Bootstrap
+        const updateFileModal = new bootstrap.Modal(document.getElementById('updateFileModal'));
+        updateFileModal.show();
+    }
+
+    function submitModalForm() {
+        // Enviar el formulario
+        const form = document.getElementById('updateFileForm');
+        form.action = "{{ url_for('team_details.modify_title') }}";
+        form.submit();
+    }
+
+    function deleteDocument(documentId, employeeId) {
+        // Precargar los datos en los campos ocultos del formulario
+        document.getElementById('deleteDocumentId').value = documentId;
+        document.getElementById('deleteEmployeeId').value = employeeId;
+        document.getElementById('deletePage').value = document.getElementById('page').value;
+
+        // Mostrar el modal de confirmación
+        const deleteFileModal = new bootstrap.Modal(document.getElementById('deleteFileModal'));
+        deleteFileModal.show();
+    }
+
+
+</script>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('team_dashboard.index') }}" >◄ Volver</a>
+{% endblock %}

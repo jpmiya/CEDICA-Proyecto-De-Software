@@ -1,0 +1,205 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Listado de Consultas{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    <h2>Panel de consultas de portal público</h2>
+    <form id="filtros" action="{{ url_for('contacts.index') }}" method="GET">
+        <div class="row" style="justify-content: center;">
+            <div class="col">
+                <label for="start_date" class="form-label">Fecha inicio</label>
+                <input 
+                    type="date" 
+                    class="form-control" 
+                    id="start_date" 
+                    name="start_date" 
+                    value="{{ params.get('start_date', '') }}" 
+                    onchange="updateEndDateMin()"
+                >
+            </div>
+            <div class="col">
+                <label for="end_date" class="form-label">Fecha fin</label>
+                <input 
+                    type="date" 
+                    class="form-control" 
+                    id="end_date" 
+                    name="end_date" 
+                    value="{{ params.get('end_date', '') }}" 
+                    onchange="updateStartDateMax()"
+                >
+            </div>
+            
+            <div class="col">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-control" id="estado" name="estado">
+                    <option value="">Todos</option>
+                    <option value="PENDIENTE" {% if params.get("estado", '') == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                    <option value="EN PROCESO" {% if params.get("estado", "") == 'EN PROCESO' %}selected{% endif %}>En Proceso</option>
+                    <option value="TERMINADO" {% if params.get("estado", "") == 'TERMINADO' %}selected{% endif %}>Terminado</option>
+                </select>
+            </div>
+            <div class="col">
+                
+                <label for="order" class="form-label">Seleccione un orden</label>
+                <select name="order" id="order" class="form-select">
+                    <option value="">--Orden--</option>
+                    <option value="newer" {% if params.get('order', '')=='newer' %}selected{% endif %}>Más recientes</option>
+                    <option value="older" {% if params.get('order', '')=='older' %}selected{% endif %}>Más viejos</option>
+                </select>
+            </div>
+        </div>
+        <div class="row" style="justify-content: center;">
+            
+            
+            <div class="col text-end">
+                <hr>
+                <div>
+                    <a class="btn btn-secondary me-2" href="{{ url_for('contacts.index') }}">Limpiar filtros</a>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+
+    
+    <div class="row mt-4">
+        {% for consulta in consultas %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-truncate">{{ consulta.full_name }}</h5>
+                    <p class="card-text text-truncate">
+                        <strong>Fecha:</strong> {{ consulta.get_readable_creation_date }}<br>
+                        <strong>Email:</strong> {{ consulta.email }}<br>
+                        <strong>Estado:</strong> {{ consulta.state.capitalize() }}<br>
+                        {% if consulta.comment %}
+                            <strong>Comentario:</strong>
+                            <span class="text-truncate">{{ consulta.comment }}</span><br>
+                        {% endif %}
+                        <strong>Título:</strong>
+                        <span class="text-truncate">{{ consulta.title }}</span><br>
+                        <strong>Mensaje:</strong>
+                        <span class="text-truncate">{{ consulta.message }}</span>
+                    </p>
+                    <div class="d-flex justify-content-center" style="gap: 3px;">
+                        <a class="btn btn-info" href="{{ url_for('contacts.show', consulta_id=consulta.id) }}">Ver detalles</a>
+                        <button 
+                            type="button" 
+                            class="btn btn-danger" 
+                            onclick="showDeleteModal({{ consulta.id }})">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            
+        {% endfor %}
+        {% if consultas.items|length == 0 %}
+            <div class="col-12 text-center my-4">
+                <div class="alert alert-warning py-4">
+                    <h5>No se encontraron resultados</h5>
+                    <p class="mb-0">No se encontraron consultas registradas con esos criterios.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% if consultas.items|length != 0 %}
+
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if consultas.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ prev_page }}" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if consultas.items|length == 0 %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página 0 de 0</a></li>
+            {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ consultas.page }} de {{ consultas.pages }}</a></li>
+            {% endif %}
+            {% if consultas.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ next_page }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro que desea eliminar este contacto?</p>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form method="POST" action="{{ url_for('contacts.delete') }}">
+                            <input type="hidden" name="contact_id" id="deleteContactId" value="">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </div>
+                
+            </div>
+        </div>
+    </div>
+
+<script>
+    function showDeleteModal(contactId) {
+        document.getElementById('deleteContactId').value = contactId;
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+
+    
+</script>
+<script>
+    function updateEndDateMin() {
+        const startDate = document.getElementById('start_date').value;
+        const endDateInput = document.getElementById('end_date');
+
+        if (startDate) {
+            endDateInput.min = startDate; // Establece la fecha mínima en el segundo input
+        }
+    }
+
+    function updateStartDateMax() {
+        const endDate = document.getElementById('end_date').value;
+        const startDateInput = document.getElementById('start_date');
+
+        if (endDate) {
+            startDateInput.max = endDate; // Establece la fecha máxima en el primer input
+        }
+    }
+
+    // Inicializa las restricciones al cargar la página (opcional)
+    document.addEventListener('DOMContentLoaded', () => {
+        updateEndDateMin();
+        updateStartDateMax();
+    });
+</script>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}">◄ Volver</a>
+{% endblock %}
+
+

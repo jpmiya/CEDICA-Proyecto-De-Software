@@ -1,0 +1,157 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid" style="justify-content: space-between;">
+        <!-- Logo -->
+        <a class="navbar-brand" href="{{ url_for('auth.home') }}">
+            <img src="{{ url_for('static', filename='logo_cedica.jpg') }}" alt="CEDICA" style="width: 100px; height: auto;">
+        </a>
+
+        <!-- Botón toggler -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar colapsable -->
+        <div class="collapse navbar-collapse" id="navbarNavDropdown" style="justify-content:space-around;">
+            <ul class="nav nav-pills">
+                <!-- Botón dropdown de Jinetes -->
+                {% if check_permission('rider_index') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Jinetes y Amazonas
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('riders.index') }}">Listar</a></li>
+                        {% endif %}
+                        {% if check_permission('rider_create') %}
+                        <li><a class="dropdown-item" href="{{ url_for('riders.new_rider') }}">Registrar</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+
+                <!-- Botón dropdown de Ecuestre -->
+                {% if check_permission('horse_index') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Ecuestre
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('equestrian_dashboard.index') }}">Listar</a></li>
+                        {% if check_permission('horse_create') %}
+                        <li><a class="dropdown-item" href="{{ url_for('equestrian.index')}}">Registrar</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                {% if check_permission('team_index') %}
+                <!-- Botón dropdown de Equipo -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Equipo
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('team_dashboard.index') }}">Listar</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('team.index') }}">Registrar</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+                <!-- Botón dropdown de Publicaciones -->
+                {% if check_permission('publication_index') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Publicaciones
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('publication_dashboard.index') }}">Listar</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('publication.index') }}">Registrar</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+                
+                {% if check_permission('payments_index') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Pagos
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('payments.dashboard') }}">Listar</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('payments.new_payment') }}">Registrar</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- Botón dropdown de Usuarios -->
+                {% if check_permission('accept') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Usuarios
+                    </a>
+                    <ul class="dropdown-menu">
+                        {% if check_permission('users_index') %}
+                            <li><a class="dropdown-item" href="{{ url_for('user_dashboard.index') }}">Listar</a></li>
+                        {% endif %}
+                        {% if check_permission('users_create') %}
+                            <li><a class="dropdown-item" href="{{ url_for('user.index') }}">Registrar</a></li>
+                        {% endif %}
+                        {% if check_permission('accept') %}
+                        <li><a class="dropdown-item" href="{{ url_for('pending_users.index') }}">Usuarios pendientes</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+                <!--Cobros-->
+                {% if check_permission('charges_index') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Cobros
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('charges.index_charges') }}">Listar</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('charges.new_charge') }}">Registrar</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+                <!--Contacto-->
+                {% if check_permission('contacts_index') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Contacto
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('contacts.index') }}">Listar</a></li>
+                        
+                    </ul>
+                </li>
+                {% endif %}
+                <!--Estadisticas-->
+                {% if check_permission('report_index') %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Estadísticas
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">Listar</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+
+            </ul>
+
+            <!-- Perfil de usuario y Cerrar sesión -->
+            <div class="d-flex align-items-center">
+                
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span style="font-size: 1.0rem;"> {{ session['alias'] }} 👤</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="{{ url_for('user.profile', user_id = session['id']) }}">Mi perfil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Cerrar sesión</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</nav>

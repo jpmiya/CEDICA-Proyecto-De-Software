@@ -1,0 +1,42 @@
+{% extends 'templates_base/layout.html' %}
+
+{% block title %}
+    Gráfico de torta de discapacidades en Certificado de Discapacidad
+{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center"> Gráfico de torta de discapacidades en Certificado de Discapacidad</h2>
+        </div>
+        <div class="col-md-12 text-center">
+            <div class="text-center mt-4">
+                <a href="{{ url_for('graphics.download_pie_chart_disabilities') }}" class="btn btn-success">
+                    Descargar (PNG)
+                </a>
+        </div>
+    </div>
+
+    
+
+    <div class="text-center">
+        <!-- Mostrar el gráfico como una imagen -->
+        <img src="data:image/png;base64,{{ chart }}" 
+             alt="Gráfico de Diagnósticos" 
+             style="max-width: 100%; height: auto; border: 2px solid black; margin: 2px;">
+    </div>
+   <!-- Botón para descargar -->
+   
+</div>
+</div>
+
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('reports.index') }}" >◄ Volver</a>
+{% endblock %}

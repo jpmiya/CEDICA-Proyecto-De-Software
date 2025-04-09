@@ -1,0 +1,280 @@
+{% extends "templates_base/layout.html" %}
+{% block title %}Panel de Empleados{% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Panel de búsqueda de Empleados del equipo</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('team_dashboard.order') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="order" class="form-label">Ordenar por:</label>
+                    <select name="order" id="order" class="form-select">
+                        <option value="name" {% if order=='name' %}selected{% endif %}>Nombre</option>
+                        <option value="last_name" {% if order=='last_name' %}selected{% endif %}>Apellido</option>
+                        <option value="email" {% if order=='email' %}selected{% endif %}>Email</option>
+                        <option value="start_date" {% if order=='start_date' %}selected{% endif %}>Fecha de creación</option>
+                    </select>
+                </div>
+
+                
+                <div class="col-md-3">
+                    <label for="search_by" class="form-label">Buscar por:</label>
+                    <select name="search_by" id="search_by" class="form-select" >
+                        <option value="name" {% if search_by=='name' %}selected{% endif %}>Nombre</option>
+                        <option value="last_name" {% if search_by=='last_name' %}selected{% endif %}>Apellido</option>
+                        <option value="dni" {% if search_by=='dni' %}selected{% endif %}>DNI</option>
+                        <option value="email" {% if search_by=='email' %}selected{% endif %}>Email</option>
+                        <option value="profesion" {% if search_by=='profesion' %}selected{% endif %}>Profesión</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" id="search_value" style="display:none;">
+                    <label for="search_value" class="form-label">Valor de búsqueda:</label>
+                    <input type="text" name="search_value" id="search_value" class="form-control"
+                    value="{% if search_by != 'profesion' %}{{ search_value }}{% else %}{% endif %}">
+                </div>
+
+                <div class="col-md-3" id="profesionDropdown" style="display:none;">
+                    <label for="profesion_value" class="form-label">Profesión:</label>
+                    <select name="profesion_value" id="profesion_value" class="form-select">
+                        <option value="Psicologo/a" {% if search_value=='Psicologo/a' %}selected{% endif %}>Psicólogo/a</option>
+                        <option value="Psicomotricista" {% if search_value=='Psicomotricista' %}selected{% endif %}>Psicomotricista</option>
+                        <option value="Medico/a" {% if search_value=='Medico/a' %}selected{% endif %}>Médico/a</option>
+                        <option value="Kinesiologo/a" {% if search_value=='Kinesiologo/a' %}selected{% endif %}>Kinesiólogo/a</option>
+                        <option value="Terapista Ocupacional" {% if search_value=='Terapista Ocupacional' %}selected{% endif %}>Terapista Ocupacional</option>
+                        <option value="Psicopedagogo/a" {% if search_value=='Psicopedagogo/a' %}selected{% endif %}>Psicopedagogo/a</option>
+                        <option value="Docente" {% if search_value=='Docente' %}selected{% endif %}>Docente</option>
+                        <option value="Profesor" {% if search_value=='Profesor' %}selected{% endif %}>Profesor</option>
+                        <option value="Fonoaudiologo/a" {% if search_value=='Fonoaudiologo/a' %}selected{% endif %}>Fonoaudiólogo/a</option>
+                        <option value="Veterinario/a" {% if search_value=='Veterinario/a' %}selected{% endif %}>Veterinario/a</option>
+                        <option value="Otro" {% if search_value=='Otro' %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" id="toggleOrder" class="btn btn-outline-secondary form-control"
+                        value="{{ order_direction }}">
+                        {{ 'Asc' if order_direction == 'asc' else 'Desc' }}
+                    </button>
+                </div>
+
+                <input type="hidden" name="order_direction" id="orderInput" value="{{ order_direction }}">
+                <input type="hidden" name="page" id="page" value="{{ pagination.page }}">
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary" onclick="goToPage(1)">Filtrar</button>
+                </div>
+            </form>
+            
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" id="resetFilters" class="btn btn-outline-danger form-control" onclick="resetPage()">Limpiar filtros</button>
+            </div>            
+
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for employee in employees %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ employee.name }} {{ employee.last_name }}</h5>
+                    <p class="card-text">Email: {{ employee.email }}</p>
+                    <p class="card-text">DNI: {{ employee.dni }}</p>
+                    {% if alias_dict[employee.user_id] %}
+                    <p class="card-text"> Alias: {{ alias_dict[employee.user_id] }} </p>
+                    {% endif %}
+                    <p class="card-text">Fecha de creación: {{ employee.get_readable_creation_date }} </p>
+                    <div class="d-flex justify-content-center" style="gap: 3px;">
+                        
+                        <button type="button" class="btn btn-info mb-2" onclick="showEmployeeDetails('{{ employee.id }}')">Ver detalles</button>
+                    
+                        {% if employee.active %}
+                            <button type="button" class="btn btn-danger mb-2" 
+                                    onclick="openDeleteEmployeeModal('{{ employee.id }}', '{{ employee.name }} {{ employee.last_name }}', 'baja')">
+                                Dar de baja
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-success mb-2" 
+                                    onclick="openDeleteEmployeeModal('{{ employee.id }}', '{{ employee.name }} {{ employee.last_name }}', 'alta')">
+                                Dar de alta
+                            </button>
+                        {% endif %}
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if pagination.pages >= 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="goToPage('{{ pagination.prev_num }}')" aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{
+                    pagination.pages }}</a></li>
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="goToPage('{{ pagination.next_num }}')" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% else %}
+    <div class="alert alert-warning mt-4 text-center" role="alert">
+        No se encontraron empleados.
+    </div>
+    {% endif %}
+    
+    <!-- Modal -->
+    <div class="modal fade" id="deleteEmployeeModal" tabindex="-1" aria-labelledby="deleteEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteEmployeeModalLabel">Confirmar Acción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro de que desea <span id="deleteEmployeeAction"></span> al emplead/ao <span id="deleteEmployeeName"></span>?  
+                    <p class="mt-3 text-danger employee-warning-message" style="display: none;">
+                        <strong>Atención:</strong> Este empleado <strong>puede</strong> estar vinculado a actividades institucionales con uno o más jinetes/amazonas.  
+                        Darlo de baja puede generar <strong>inconsistencias</strong> en los registros de estas actividades.  
+                        Antes de proceder, asegúrese de actualizar o reasignar las actividades correspondientes.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteEmployeeForm" method="POST" action="{{ url_for('team_dashboard.delete') }}">
+                        <input type="hidden" name="employee_id" id="deleteEmployeeId">
+                        <input type="hidden" name="op" id="deleteEmployeeOp">
+                        <button type="submit" class="btn btn-danger" id="confirmDeleteEmployeeButton">Confirmar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+</div>
+
+<script>
+    const toggleButton = document.getElementById('toggleOrder');
+    const orderInput = document.getElementById('orderInput');
+
+
+    toggleButton.addEventListener('click', function () {
+        if (toggleButton.value === 'asc') {
+            toggleButton.textContent = 'Desc';
+            toggleButton.value = 'desc';
+            orderInput.value = 'desc';
+        } else {
+            toggleButton.textContent = 'Asc';
+            toggleButton.value = 'asc';
+            orderInput.value = 'asc';
+        }
+    });
+
+    function goToPage(pageNumber) {
+        const pageInput = document.getElementById('page');
+        
+        pageInput.value = pageNumber;
+        document.forms[0].submit();
+    }
+
+
+
+    function handleFilterChange() {
+        const search_by = document.getElementById('search_by').value;
+        const searchField = document.getElementById('search_value');
+        const profesionDropdown = document.getElementById('profesionDropdown');
+
+        
+        searchField.style.display = 'none';
+        profesionDropdown.style.display = 'none';
+        
+        if (search_by === 'profesion') {
+            profesionDropdown.style.display = 'block';
+        } else {
+            searchField.style.display = 'block';
+        }
+    }   
+
+
+    // Inicialmente esconder todos
+
+    document.addEventListener('DOMContentLoaded', handleFilterChange);
+    document.getElementById('search_by').addEventListener('change', handleFilterChange);
+    
+    function showEmployeeDetails(employeeId) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('team_details.index') }}";
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'employee_id';
+        input.value = employeeId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function resetPage() {
+        window.location.href = "{{ url_for('team_dashboard.order') }}";
+    }
+
+
+    function openDeleteEmployeeModal(employeeId, employeeName, op) {
+        // Configurar datos dinámicos
+        const actionText = op === 'baja' ? 'dar de baja' : 'dar de alta';
+        const opValue = op === 'baja' ? 'eliminado' : 'activado';
+
+        document.getElementById('deleteEmployeeAction').textContent = actionText;
+        document.getElementById('deleteEmployeeName').textContent = employeeName;
+        document.getElementById('deleteEmployeeId').value = employeeId;
+        document.getElementById('deleteEmployeeOp').value = opValue;
+
+        // Mostrar/ocultar el mensaje de advertencia
+        const warningMessage = document.querySelector('.employee-warning-message');
+        if (op === 'baja') {
+            warningMessage.style.display = 'block';
+        } else {
+            warningMessage.style.display = 'none';
+        }
+
+        // Cambiar estilo del botón según la acción
+        const confirmButton = document.getElementById('confirmDeleteEmployeeButton');
+        confirmButton.className = op === 'baja' ? 'btn btn-danger' : 'btn btn-success';
+
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById('deleteEmployeeModal'));
+        modal.show();
+    }
+</script>
+
+
+</script>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}" >◄ Volver</a>
+{% endblock %}
+

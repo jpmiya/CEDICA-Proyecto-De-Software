@@ -1,0 +1,128 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Perfil jinete: {{ rider.name }} {{ rider.last_name }} {% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    
+    <h3> {{ rider.name }} {{ rider.last_name }} </h3>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            {% if info_general %}
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Información general</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="#">Información general</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('riders.show_documentation', user_id=user_id) }}">Documentación</a>
+            </li> 
+        </ul>
+    </div>
+    <br>
+
+    <div class="row">
+        <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link {% if datos_personales %}active{% endif %}" id="datos-personales-tab" data-toggle="tab" href="{{ url_for('riders.show_edit_personal_data', user_id=user_id) }}" role="tab" aria-controls="datos-personales" aria-selected="true">Datos personales</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if discapacidad_y_pensiones %}active{% endif %}" id="discapacidad-tab" data-toggle="tab" href="{{ url_for('disabilities.show_edit_disability_and_pension_data', user_id=user_id) }}" role="tab" aria-controls="discapacidad" aria-selected="false">Discapacidad y Pensiones</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if obra_social_y_datos_escolares %}active{% endif %}" id="obra-social-tab" data-toggle="tab" href="{{ url_for('insurance_and_schools.show_edit_social_and_school_data', user_id=user_id) }}" role="tab" aria-controls="obra-social" aria-selected="false">Situación Previsional y Datos escolares</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if tutores %}active{% endif %}" id="tutores-tab" data-toggle="tab" href="{{ url_for('tutors.show_edit_tutors', user_id=user_id) }}" role="tab" aria-controls="tutores" aria-selected="false">Tutores</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if trabajo_institucional %}active{% endif %}" id="trabajo-institucional-tab" data-toggle="tab" href="{{ url_for('institutional_works.show_edit_institutional_work', user_id=user_id) }}" role="tab" aria-controls="trabajo-institucional" aria-selected="false">Trabajo Institucional</a>
+            </li>
+            
+        </ul>
+        <hr>
+        <!-- Contenido de los formularios -->
+        <div class="row text-center">
+            <!-- Formulario de datos personales -->
+            {% if datos_personales %}
+                
+                {% set action_datos_personales = url_for('riders.edit_personal_data', user_id = user_id) %}
+                
+                
+                {% include 'jinetes/formularios/datos_personales.html' %}
+            <!---->
+
+            <!-- Formulario de datos discapacidad y pensiones -->
+            {% elif discapacidad_y_pensiones %}
+                
+                {% set action_datos_discapacidad = url_for('disabilities.edit_disability_and_pension_data', user_id=user_id) %}
+                {% include 'jinetes/formularios/datos_discapacidad.html' %}
+            <!---->
+
+            <!-- Formulario de datos de obra social y escolares -->
+            {% elif obra_social_y_datos_escolares %}
+                
+                {% set action_datos_obra_social_y_datos_escolares = url_for('insurance_and_schools.edit_social_and_school_data', user_id=user_id) %}
+                {% include 'jinetes/formularios/datos_obra_social_y_datos_escolares.html' %}
+            
+            <!---->
+
+            <!-- Formulario de tutores -->
+            {% elif tutores %}
+                {% set action_tutores = url_for('tutors.edit_tutors', user_id = user_id) %}
+                {% include 'jinetes/formularios/datos_tutores.html' %}
+            
+            <!---->
+
+            <!-- Formulario de trabajo institucional -->
+            {% elif trabajo_institucional %}
+                {% set action_trabajo_institucional = url_for('institutional_works.edit_institutional_work', user_id=user_id) %}
+                {% include 'jinetes/formularios/datos_trabajo_institucional.html' %}
+
+            <!---->
+            {% endif %}
+        </div>
+    </div>
+    
+
+
+    
+    
+    {% block modal %}
+        <div class="modal fade" id="cancelRegistry" tabindex="-1" aria-labelledby="cancelRegistry" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Header del modal -->
+                <div class="modal-header">
+                <h1 class="modal-title fs-5" id="label_cancelar_registro">Cancelar registro</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <!-- Cuerpo del modal -->
+                <div class="modal-body">
+                    <h2> Si aún no le confirmamos los cambios, no se han guardado. ¿Está seguro/a de salir? </h2>
+                </div>
+                
+                <!-- Footer del modal -->
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Seguir trabajando</button>
+                <a class="btn btn-danger" href="{{ url_for('riders.show_rider', user_id = user_id) }}">Cancelar</a>
+        
+                </div>
+            </div>
+            </div>
+        </div>
+    {% endblock %}
+
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('riders.index') }}">◄ Volver</a>
+{% endblock %}
+

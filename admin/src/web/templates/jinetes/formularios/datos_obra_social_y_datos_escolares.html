@@ -1,0 +1,117 @@
+<form id="datos_obra_social_escolar" action="{{ action_datos_obra_social_y_datos_escolares }}" method="post">
+    <!-- Notificación de campos obligatorios -->
+    <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+
+    <!-- Encabezado -->
+    <div class="text-center">
+        <h5>Datos de Situación Provisional</h5>
+    </div>
+
+    <!-- Sección: Obra Social -->
+    <div class="row mt-3">
+        <div class="col">
+            <label for="insurance" class="form-label">Obra Social *</label>
+            <input type="text" class="form-control" id="insurance" name="insurance_name" 
+                   placeholder="Obra social" maxlength="50" required
+                   pattern="^(?!.*\.\.)(?!.*  )[A-Za-záéíóúÁÉÍÓÚ]+(?:[.][A-Za-záéíóúÁÉÍÓÚ]+| [A-Za-záéíóúÁÉÍÓÚ]+)*$"
+                   title="Ingrese solo letras, sin puntos consecutivos ni espacios dobles. Ejemplo: 'PAMI' o 'I.O.M.A'."
+                   value="{{ params.get('insurance_name', '') }}">
+        </div>
+        <div class="col">
+            <label for="affiliate_number" class="form-label">N° de afiliado</label>
+            <input type="text" class="form-control" id="affiliate_number" name="affiliate_number"
+                   placeholder="Número de afiliado" 
+                   pattern="\d+"
+                   maxlength="20"
+                   title="Solo ingrese números (máximo 20 caracteres)"
+                   value="{{ params.get('affiliate_number', '') }}"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col text-center">
+            <label class="form-label">¿Posee Curatela?*</label>
+            <div class="custom_radio">
+                <label>
+                    <input type="radio" id="guardianship_yes" name="has_guardianship" value="yes" required
+                    {% if params.get('has_guardianship', '') == 'yes' %} checked {% endif %}/>
+                    <span>Sí</span>
+                </label>
+                <label>
+                    <input type="radio" id="guardianship_no" name="has_guardianship" value="no" required
+                    {% if params.get('has_guardianship', '') == 'no' %} checked {% endif %}/>
+                    <span>No</span>
+                </label>
+            </div>
+            <label for="guardianship_observations" class="form-label">Observaciones de curatela</label>
+            <textarea class="form-control" id="guardianship_observations" name="guardianship_observations" rows="3">{{ params.get('guardianship_observations', '') }}</textarea>
+        </div>
+    </div>
+
+    <!-- Encabezado: Institución Escolar -->
+    <hr>
+    <div class="row">
+        <div class="text-center">
+            <h5>Institución Escolar a la que Concurre Actualmente</h5>
+        </div>
+        <div class="col">
+            <label for="school_name" class="form-label">Nombre de la institución *</label>
+            <input type="text" class="form-control" id="school_name" name="school_name" 
+                   placeholder="Ingrese el nombre de la escuela" maxlength="50" required
+                   pattern="^(?!.*  )(?!.*[.,'\-]{2})(?![.,'\-])(?!.*[.,'\-]$)[A-Za-záéíóúÁÉÍÓÚñÑ0-9°]+(?:[.,'\-]?[A-Za-záéíóúÁÉÍÓÚñÑ0-9°]+| [A-Za-záéíóúÁÉÍÓÚñÑ0-9°]+)*$"
+                   title="Ingrese un nombre con formato válido, como '25 de Mayo', 'Secundaria N°3' o 'Liceo V. Mercante'"
+                   value="{{ params.get('school_name', '') }}">
+        </div>
+        <div class="col">
+            <label for="school_address" class="form-label">Dirección de la institución *</label>
+            <input type="text" class="form-control" id="school_address" name="school_address"
+                   pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñüÜ0-9'.,\s]+$"
+                   title="Ingrese una dirección valida, como '50 120', 'Sarmiento 123' o 'J.J. Passo'"
+                   placeholder="Ingrese la dirección" maxlength="50" required 
+                   value="{{ params.get('school_address', '') }}">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label for="school_telephone" class="form-label">Teléfono *</label>
+            <input type="text" class="form-control" id="school_telephone" name="school_telephone" 
+                   placeholder="Solo ingrese números" maxlength="10" required 
+                   pattern="\d{10}"
+                   title="Sólo ingrese 10 números, nada de '+', '-' u otros símbolos"
+                   value="{{ params.get('school_telephone', '') }}">
+        </div>
+        <div class="col">
+            <label for="rider_school_grade" class="form-label">Grado *</label>
+            <input type="number" class="form-control" id="rider_school_grade" name="rider_school_grade" 
+                   placeholder="Grado" required min="1" max="7"
+                   title="El grado es un número entero de 1 al 7"
+                   value="{{ params.get('rider_school_grade', '') }}">
+        </div>
+    </div>
+
+    <!-- Observaciones y Profesionales -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="school_observations" class="form-label">Observaciones de la institución escolar</label>
+            <textarea class="form-control" id="school_observations" name="school_observations" rows="3">{{ params.get('school_observations', '') }}</textarea>
+        </div>
+        <div class="col-md-6">
+            <label for="professionals" class="form-label">Profesionales que lo atienden</label>
+            <textarea class="form-control" id="professionals" name="professionals" rows="3" maxlength="500">{{ params.get('professionals', '') }}</textarea>
+        </div>
+
+    </div>
+    
+
+    <!-- Botones de acción -->
+    <hr>
+    {% if check_permission('rider_create') or check_permission('rider_update') %}
+        <div class="row">
+            <div class="col-md-12 text-end">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelRegistry">Cancelar</button>
+                <button type="submit" value="Guardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    {% endif %}
+</form>

@@ -1,0 +1,364 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+  color: #333;
+  line-height: 1.6;
+  padding: 15px;
+}
+
+header {
+  background-color: #ffffff;
+  color: #fff;
+  padding: 1px;
+  text-align: center;
+}
+
+
+.content-container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+form {
+  padding: 2px;
+  background-color: lightgrey;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px black;
+}
+
+.form-check {
+  display: inline-block;
+}
+
+.form-check-input {
+  display: none;
+}
+
+.form-check-label {
+  padding: 5px 10px;
+  border: 2px solid lightgray;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: white;
+  transition: all 0.3s ease;
+  font-size: 1.1em;
+  color: black;
+}
+h5{
+  font-weight: bold !important;
+}
+
+.form-check-input:checked + .form-check-label {
+  background-color: green;
+  color: white;
+  border-color: blue;
+}
+
+.form-check-label:hover {
+  background-color: rgb(153, 243, 156);
+}
+
+
+
+.disabled-input {
+  background-color: grey !important; /* Color de fondo claro para indicar deshabilitado */
+  cursor: not-allowed !important; /* Cambiar el cursor a indicar que no se puede interactuar */
+}
+
+/* Estilo básico para el nav-link */
+.nav-link {
+  color: black; 
+  border-radius: 5px;
+}
+
+.nav-link:hover {
+  color: white; 
+  background-color: blue; 
+}
+
+/* Estilo para el nav-link activo */
+.nav-link.active {
+  color:white !important; 
+  border-radius: 5px;
+  background-color: blue !important;
+  box-shadow: 0 4px 6px darkblue; 
+}
+
+/* Estilo general del formulario */
+.login-form {
+  background-color: #f8f9fa; /* Fondo claro */
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6; /* Borde suave */
+  box-shadow: 0 4px 8px black; /* Sombra ligera */
+}
+
+/* Estilo para las etiquetas */
+.login-form label {
+  margin-bottom: 8px;
+  color: #495057; /* Color gris oscuro */
+  font-size: 15px;
+  font-weight: bold;
+}
+
+/* Estilo para los campos de entrada */
+.login-form input[type="email"],
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  font-size: 15px;
+  color: #495057;
+  transition: border-color 0.3s ease;
+}
+
+/* Efecto al enfocar en los campos de entrada */
+.login-form input[type="email"]:focus,
+.login-form input[type="password"]:focus {
+  border-color: #80bdff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(128, 189, 255, 0.5); /* Sombra azul clara */
+}
+
+/* Estilo para el botón de inicio de sesión */
+.login-button {
+  background-color: #007bff; /* Fondo azul */
+  border: none;
+  color: #ffffff; /* Texto blanco */
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+/* Efecto al pasar el mouse sobre el botón */
+.login-button:hover {
+  background-color: #0056b3;
+}
+
+
+.nav-tabs li {
+  background-color: lightblue; /* Color de fondo más destacado */
+  color: white; /* Color de texto blanco */
+  text-align: center; /* Centrar el texto */
+  cursor: pointer; /* Cambia el cursor para indicar que es clickeable */
+}
+
+.nav-tabs li:hover {
+  background-color: skyblue; /* Color más oscuro al pasar el cursor */
+}
+
+.nav-tabs li:active {
+  background-color: blue; /* Color diferente al hacer clic */
+}
+
+@media (max-width: 1024px) {
+  .nav-tabs {
+      display: block;
+  }
+
+  .nav-tabs li {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      
+      background-color: lightblue; /* Color de fondo más destacado */
+      color: white; /* Color de texto blanco */
+      text-align: center; /* Centrar el texto */
+
+  }
+
+  .nav-tabs li:hover {
+      background-color: cornflowerblue; /* Color más oscuro al pasar el cursor */
+
+  }
+
+  .nav-tabs li:active {
+      background-color: blue; /* Color diferente al hacer clic */
+  }
+  
+}
+
+
+footer {
+  display: block;
+  clear: both;
+  width: 100%;
+  margin-top: 20px;
+}
+
+
+:focus {
+  outline: 0;
+  border-color: blue;
+  box-shadow: 0 0 0 4px white;
+}
+
+.custom_radio div {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+.custom_radio input[type="radio"] {
+  clip: rect(0 0 0 0);
+  clip-path: inset(100%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.custom_radio input[type="radio"]:checked + span {
+  box-shadow: 0 0 0 0.0625em blue;
+  background-color: green;
+  z-index: 1;
+  color: white;
+}
+
+label span {
+  display: block;
+  cursor: pointer;
+  background-color: #fff;
+  padding: 0.375em .75em;
+  position: relative;
+  margin-left: .0625em;
+  box-shadow: 0 0 0 0.0625em #b5bfd9;
+  letter-spacing: .05em;
+  color: #3e4963;
+  text-align: center;
+  transition: background-color .5s ease;
+}
+
+label:first-child span {
+  border-radius: .375em 0 0 .375em;
+}
+
+label:last-child span {
+  border-radius: 0 .375em .375em 0;
+}
+
+
+.responsive-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.responsive-form > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.responsive-form > div > div {
+  flex: 1 1 calc(33.33% - 10px);
+  min-width: 200px;
+}
+
+
+.custom-file-input {
+  opacity: 0; /* Oculta el input pero lo mantiene accesible */
+  position: absolute; /* Posiciona el input fuera de la vista */
+  z-index: -1; /* Asegura que no interfiera con el botón */
+}
+
+.custom-file-label {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: black;
+  background-color: lightcyan;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Estilo al pasar el mouse */
+.custom-file-label:hover {
+  background-color: gray; /* Azul más oscuro */
+  border-color: darkblue; /* Bordes más visibles */
+}
+
+/* Estilo al hacer clic */
+.custom-file-label:active {
+  background-color: green; /* Azul aún más oscuro */
+}
+
+/* Estilo para el texto del botón */
+.custom-file-label:after {
+  display: inline-block;
+}
+
+/* Estilo para un input enfocado (accesibilidad) */
+.custom-file-input:focus + .custom-file-label {
+  outline: 2px solid green;
+  outline-offset: 2px;
+}
+
+
+/* Remove the focus outline from the carousel control buttons */
+.carousel-control-prev:focus, 
+.carousel-control-next:focus {
+    outline: none;
+    box-shadow: none; /* Optional: Removes any box-shadow if applied */
+}
+.carousel-inner img {
+  border-radius: 50%;
+}
+
+textarea {
+  resize: none;
+}
+
+
+
+.card {
+    height: 100%; /* Asegura que todas las tarjetas ocupen el mismo espacio */
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    overflow: hidden; /* Oculta el contenido desbordado */
+    text-overflow: ellipsis; /* Agrega "..." al final del texto desbordado */
+    max-width: 100%; /* Asegura que no desborde los límites del contenedor */
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribuye el contenido de manera uniforme */
+}
+
+.card-text {
+    margin-bottom: auto; /* Permite espacio para otros elementos */
+}
+
+main {
+  min-height: calc(80vh - 100px); /* Ajusta el 100px según la altura del header y el footer */
+  display: flex;
+  flex-direction: column;
+}

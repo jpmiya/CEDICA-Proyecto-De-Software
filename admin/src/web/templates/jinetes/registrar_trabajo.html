@@ -1,0 +1,57 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Trabajo institucional {% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+    {% block progress_bar %}
+        <div class="progress" role="progressbar" aria-label="Success example" aria-valuenow="98" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar bg-success" style="width: 98%"></div>
+        </div>
+
+    {% endblock %}
+    <h5>Datos de trabajo en la institución de {{ name }} {{ last_name }} </h5>
+    
+    {% block campos_de_formulario %}
+        
+        {% set action_trabajo_institucional = url_for('institutional_works.new_institutional_work', user_id = user_id) %}
+        {% include "jinetes/formularios/datos_trabajo_institucional.html" %}
+
+    {% endblock %}
+
+    {% block modal %}
+        <div class="modal fade" id="cancelRegistry" tabindex="-1" aria-labelledby="cancelRegistry" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Header del modal -->
+                <div class="modal-header">
+                <h1 class="modal-title fs-5" id="label_cancelar_registro">Cancelar registro</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <!-- Cuerpo del modal -->
+                <div class="modal-body">
+                    <h6> {{ rider.name }} {{ rider.last_name }} ya está registrado. Si aprieta "Cancelar" podrá seguir con el registro más tarde.</h6>
+                </div>
+                
+                <!-- Footer del modal -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Seguir trabajando</button>
+                    <a class="btn btn-danger" href="{{ url_for('riders.index') }}">Cancelar</a>
+        
+                </div>
+            </div>
+            </div>
+        </div>
+    {% endblock %}
+
+
+
+{% endblock %}
+{% block volver %}
+<a class="btn btn-danger" href="{{ url_for('riders.index') }}" >◄ Volver</a>
+{% endblock %}

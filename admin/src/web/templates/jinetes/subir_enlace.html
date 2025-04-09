@@ -1,0 +1,57 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Subir enlace de jinete {% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+    
+    <h4> Jinete: {{ rider.name }} {{ rider.last_name }}</h4>
+    <h2 class="text-center mb-4">Subir Enlace</h2>
+    <form action="{{ url_for('riders.upload_link', user_id = user_id) }}" method="POST">
+        <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+        <div class="form-group">
+            <label for="title">Título del Enlace (*)</label>
+            <input type="text" class="form-control" id="title"
+            value = "{{ params.get('title', '') }}" maxlength="30"
+            name="title" placeholder="Escribe el título" required>
+        </div>
+        <div class="form-group">
+            <label for="type">Tipo del documento (*)</label>
+            <select id="type" name="document_type" class="form-select" required>
+                <option value="" {% if params.get('document_type', '')=='' %}selected{% endif %}>Seleccione una opción</option>
+                <option value="entrevista" {% if params.get('document_type', '')=='entrevista' %}selected{% endif %}>Entrevista</option>
+                <option value="evaluacion" {% if params.get('document_type', '')=='evaluacion' %}selected{% endif %}>Evaluación</option>
+                <option value="planificaciones" {% if params.get('document_type', '')=='planificaciones' %}selected{% endif %}>Planificaciones</option>
+                <option value="evolucion" {% if params.get('document_type', '')=='evolucion' %}selected{% endif %}>Evolución</option>
+                <option value="cronicas" {% if params.get('document_type', '')=='cronicas' %}selected{% endif %}>Crónicas</option>
+                <option value="documental" {% if params.get('document_type', '')=='documental' %}selected{% endif %}>Documental</option>
+            </select>
+            
+        </div>
+        <div class="form-group mt-3">
+            <label for="link">Enlace (*)</label>
+            <input type="url" class="form-control" id="link" name="link"
+            value="{{ params.get('link', '')}}"
+            placeholder="Pega el enlace" required > 
+            
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col text-end">
+                    <button type="reset" class="btn btn-secondary w-100 mt-4">Limpiar</button>
+                    <button type="submit" class="btn btn-primary w-100 mt-4">Subir Enlace</button>
+                </div>
+            </div>
+        </div>
+        
+    </form>
+
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('riders.show_documentation', user_id=user_id) }}" >◄ Volver</a>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'templates_base/layout.html' %}
+
+{% block title %}
+    Reportes y Gráficos
+{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center">Reportes y gráficos del sistema</h2>
+    <div class="row">
+        <!-- Column 1: Reportes -->
+        <div class="col-md-6 text-center">
+            <h3>Reportes</h3>
+            <a href="{{ url_for('reports.show_ranking_proposals') }}" class="btn btn-primary w-100 mb-2" style="max-width: 300px;">Propuestas más solicitadas</a>
+            <a href="{{ url_for('reports.show_riders_without_full_information') }}" class="btn btn-primary w-100 mb-2" style="max-width: 300px;">Jinetes/Amazonas que cuya información esta incompleta</a>
+            <a href="{{ url_for('reports.show_riders_in_debt') }}" class="btn btn-primary w-100" style="max-width: 300px;">Jinetes que adeudan pagos</a>
+        </div>
+
+        <!-- Column 2: Gráficos -->
+        <div class="col-md-6 text-center">
+            <h3>Gráficos</h3>
+            <a href="{{ url_for('graphics.show_pie_chart_disabilities') }}" class="btn btn-success w-100 mb-2" style="max-width: 300px;">Gráfico de discapacidades en Certificado de Discapacidad de jinetes/amazonas</a>
+            <a href="{{ url_for('graphics.show_pie_chart_scholarships') }}" class="btn btn-success w-100 mb-2" style="max-width: 300px;">Gráfico de jinetes/amazonas becados</a>
+            <a href="{{ url_for('graphics.show_bar_chart_job_position') }}" class="btn btn-success w-100" style="max-width: 300px;">Gráfico de empleados activos por posición laboral</a>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}" >◄ Volver</a>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Detalle del Cobro {% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+    <h2>Detalle del Cobro</h2>
+    <div class="card">
+        <div class="card-body">
+            
+            <p class="card-text"><strong>Jinete/Amazona:</strong> {{ rider.name }} {{ rider.last_name }}</p>
+            <p class="card-text"><strong>Fecha del Pago:</strong> {{ charge.formatted_charge_date() }}</p>
+            <p class="card-text"><strong>Medio de Pago:</strong> {{ charge.payment_method.value.replace('_', ' ').title() }}</p>
+            <p class="card-text"><strong>Monto:</strong> ${{ charge.amount }}</p>
+            <p class="card-text"><strong>Recibido por:</strong> {{ receiver.name }} {{ receiver.last_name }}</p>
+            <p class="card-text"><strong>Observaciones:</strong> {{ charge.observations }}</p>
+            <p class="card-text"><strong>Deudor:</strong> {{ 'Sí' if rider.has_debt else 'No' }}</p>
+            <input type="hidden" name="charge_id" value="{{ charge.id }}">
+        </div>
+    </div>
+
+    <div class="row" style="justify-content: center; margin-top: 20px;">
+        <div class="col text-center">
+            <a class="btn btn-warning" href="{{ url_for('charges.edit_charge', id=charge.id) }}">Editar Cobro</a>
+            <button class="btn btn-danger" onclick="setChargeId({{ charge.id }})" data-bs-toggle="modal" data-bs-target="#deleteChargeModal">Eliminar Cobro</button>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="deleteChargeModal" tabindex="-1" aria-labelledby="deleteChargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteChargeModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro de que desea eliminar este cobro? Esta acción es <strong>irreversible</strong>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button id="confirmDeleteButton" type="button" class="btn btn-danger">Eliminar cobro</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+
+<script>
+    let chargeIdToDelete = null;
+
+    // Establece el ID del cobro a eliminar
+    function setChargeId(chargeId) {
+        chargeIdToDelete = chargeId;
+    }
+
+    // Agrega un evento al botón de confirmación del modal
+    document.getElementById('confirmDeleteButton').addEventListener('click', function () {
+        if (chargeIdToDelete) {
+            // Obtener la URL base generada por Jinja con un marcador de posición
+            let urlTemplate = "{{ url_for('charges.delete_charge', id=1234567890) }}";
+            
+            // Reemplazar el marcador de posición con el ID dinámico
+            let actionUrl = urlTemplate.replace('1234567890', chargeIdToDelete);
+
+            // Crear un formulario dinámico
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = actionUrl;
+
+            // Agregar el formulario al documento y enviarlo
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+
+</script>
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('charges.index_charges') }}" >◄ Volver</a>
+{% endblock %}

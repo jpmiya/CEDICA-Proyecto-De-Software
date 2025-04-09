@@ -1,0 +1,45 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Inicio{% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Perfil de Usuario</h2>
+                </div>
+                <div class="card-body">
+                    <h3>{{ user.alias }}</h3>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Estado:</strong> {% if user.active %}Activo{% else %}Inactivo{% endif %}</p>
+                    <p><strong>Fecha de registro:</strong> {{ user.inserted_at.strftime('%d-%m-%Y %H:%M:%S') }}</p>
+                    <p><strong>Última actualización:</strong> {{ user.updated_at.strftime('%d-%m-%Y %H:%M:%S') }}</p>
+                    <p><strong>Administrador del sistema:</strong> {% if user.system_admin %}Sí{% else %}No{% endif %}</p>
+                    
+                    <h4 class="mt-4">Roles:</h4>
+                    <ul>
+                        {% for role in user.roles %}
+                            <li>{{ role.name }}</li>
+                        {% else %}
+                            <li>No tiene roles asignados</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="mt-3">
+                        <a href="{{ url_for('user.modificar', user_id=current_user_id) }}" class="btn btn-primary">Modificar Perfil</a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}" >◄ Volver</a>
+{% endblock %}

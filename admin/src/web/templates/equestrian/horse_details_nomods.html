@@ -1,0 +1,82 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Registro de Caballos{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <ul class="nav nav-tabs">
+        
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Información general</a>
+        </li>                
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('equestrian_details.horse_files', id=horse.id) }}">Documentación</a>
+        </li> 
+    </ul>
+</div>
+
+<div class="form-container">
+    <div class="form-box">
+        <h1>Detalle del Caballo {{ horse.name }}</h1>
+
+        <h2>Nombre:</h2>
+        <p>{{ horse.name }}</p>
+
+        <h2>Fecha de nacimiento:</h2>
+        <p>{{ horse.birth_date }}</p>
+
+        <h2>Sexo:</h2>
+        <p>{{ horse.gender }}</p>
+
+        <h2>Raza:</h2>
+        <p>{{ horse.breed }}</p>
+
+        <h2>Pelaje:</h2>
+        <p>{{ horse.fur }}</p>
+
+        <h2>Condición:</h2>
+        <p>{{ horse.acquisition_type }}</p>
+
+        <h2>Fecha de ingreso:</h2>
+        <p>{{ horse.entry_date }}</p>
+
+        <h3 style="text-align: left; color:rgb(0, 0, 0);">Sede:</h3>
+        <p>{{ horse.sede }}</p>
+
+        <h3 style="text-align: left; color:rgb(0, 0, 0);">Conductor asignado:</h3>
+        <p>
+            {% for conductor in conductores %}
+                {% if horse.conductor_id == conductor.id %}
+                    {{ conductor.name }} {{ conductor.last_name }}
+                {% endif %}
+            {% endfor %}
+        </p>
+
+        <h3 style="text-align: left; color:rgb(0, 0, 0);">Entrenador asignado:</h3>
+        <p>
+            {% for entrenador in entrenadores %}
+                {% if horse.trainer_id == entrenador.id %}
+                    {{ entrenador.name }} {{ entrenador.last_name }}
+                {% endif %}
+            {% endfor %}
+        </p>
+
+        <h3 style="text-align: left; color:rgb(0, 0, 0);">Tipo de J&A Asignado:</h3>
+        <p>{{ horse.rider_type }}</p>
+
+
+        
+
+    </div>
+</div>
+
+{% endblock %}  <!-- Cierre del bloque de contenido -->
+
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('equestrian_dashboard.index') }}" >◄ Volver</a>
+{% endblock %}

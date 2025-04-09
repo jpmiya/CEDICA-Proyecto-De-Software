@@ -1,0 +1,138 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} {{ 'Editar Pago' if payment else 'Crear Pago' }} {% endblock %}
+{% block navbar%}
+{% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<h1> {{ 'Editar Pago' if payment else 'Crear Pago' }} </h1>
+
+<div class="container-fluid" style="width:'50%'">
+    <form id="registro_form"
+        action="{{ url_for('payments.update_payment') if payment else url_for('payments.create_payment') }}"
+        method="POST">
+        <div class="row" style="justify-content: center;">
+            <input type="hidden" name="payment_id" value="{{ payment.id if payment else '' }}">
+            <div class="col">
+                <label for="payment_type" class="form-label">* Tipo de Pago</label>
+                <select class="form-control" id="payment_type" name="payment_type" onchange="changeOptions()" required>
+                    <option value="">Seleccione</option>
+                    <option value="Honorarios" {% if type=='Honorarios' %} selected {% endif %}>
+                        Honorarios</option>
+                    <option value="Proveedor" {% if type=='Proveedor' %} selected {% endif %}>
+                        Proveedor</option>
+                    <option value="Gastos varios" {% if type=='Gastos varios' %} selected {%endif %}>Gastos Varios
+                    </option>
+                </select>
+                <input type="hidden" name="type" value="{{ type }}">
+            </div>
+            <div class="col" id="beneficiary-container" style="display: none;">
+                <label for="beneficiary_id" class="form-label">* Beneficiario: </label>
+                <select class="form-control" id="beneficiary_id" name="beneficiary_id">
+                    <option value="">Seleccione</option>
+                    {% for beneficiary in employees %}
+                    <option value="{{ beneficiary.id }}" {% if payment and payment.beneficiary_id==beneficiary.id %}
+                        selected {% endif %}>{{ beneficiary.last_name }} {{ beneficiary.name }} DNI {{ beneficiary.dni
+                        }} {% if payment and payment.beneficiary_id== beneficiary.id %}
+                        *ACTUAL* {% endif %}</option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <div class="col">
+                <label for="amount" class="form-label">* Monto $</label>
+                <input type="text" class="form-control" id="amount" name="amount"
+                    value="{{ payment.amount if payment else '' }}" required>
+            </div>
+        </div>
+        <div class="row" style="justify-content: center;">
+            <div class="col">
+                <label for="payment_date" class="form-label">* Fecha de Pago</label>
+                <input type="date" class="form-control" id="payment_date" name="payment_date"
+                    value="{{ payment.payment_date.strftime('%Y-%m-%d') if payment else '' }}" required>
+            </div>
+        </div>
+        <div class="row" style="justify-content: center;">
+            <div class="col">
+                <label for="description" class="form-label">Descripción</label>
+                <textarea class="form-control" id="description" name="description" rows="3" maxlength="200"
+                    style="resize: none;">{{ payment.description if payment else '' }}</textarea>
+            </div>
+        </div>
+        <div class="row" style="justify-content: center; margin-top: 20px;">
+            <div class="col text-end">
+                <a class="btn btn-secondary" href="{{ url_for('payments.dashboard') }}">Cancelar</a>
+                <button type="submit" class="btn btn-primary">{{ 'Actualizar Pago' if payment else 'Crear Pago'
+                    }}</button>
+
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const paymentTypeElement = document.getElementById('payment_type');
+        const beneficiaryContainer = document.getElementById('beneficiary-container');
+        const beneficiarySelect = document.getElementById('beneficiary_id');
+
+        function changeOptions() {
+            const paymentType = paymentTypeElement.value;
+
+            if (paymentType === 'Honorarios') {
+                beneficiaryContainer.style.display = 'block';
+                beneficiarySelect.setAttribute('required', true);
+            } else {
+                beneficiaryContainer.style.display = 'none';
+                beneficiarySelect.value = '';
+                beneficiarySelect.removeAttribute('required');
+            }
+        }
+
+        // Ejecutar la función al cargar la página
+        changeOptions();
+
+        // Escuchar cambios en el select de payment_type
+        paymentTypeElement.addEventListener('change', changeOptions);
+    });
+
+    document.getElementById('amount').addEventListener('input', function () {
+
+        this.value = this.value.replace(/[^0-9.]/g, ''); // permito numeros y puntos
+        // Se asegura de que solo haya un punto decimal
+        if ((this.value.match(/\./g) || []).length > 1) {
+            this.value = this.value.replace(/\.$/, ''); // si hay mas de un punto, saco el ultimo
+        }
+    });
+
+
+    function goToPage(pageNumber) {
+        const currentUrl = new URL(window.location.href);
+
+        currentUrl.searchParams.set('page', pageNumber);
+
+        currentUrl.searchParams.set('type', 'Honorarios');
+
+        window.location.href = currentUrl.toString();
+    }
+
+    function resetPage() {
+        window.location.href = "{{ url_for('payments.new_payment') }}";
+    }
+
+    const paymentDateInput = document.getElementById('payment_date');
+
+    // Establecer el máximo de la fecha de pago como la fecha actual
+    const currentDate = new Date().toISOString().split('T')[0];
+    paymentDateInput.max = currentDate;
+
+
+</script>
+{% endblock %}
+
+{% block volver %}
+<br>
+<a class="btn btn-danger" href="{{ url_for('payments.dashboard') }}">◄ Volver</a>
+{% endblock %}

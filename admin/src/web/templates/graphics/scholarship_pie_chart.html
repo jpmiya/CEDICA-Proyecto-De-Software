@@ -1,0 +1,40 @@
+{% extends 'templates_base/layout.html' %}
+
+{% block title %}
+    Gráfico de torta de Jinetes/Amazonas becados
+{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="container my-5 text-center">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center"> Gráfico de torta de Jinetes/Amazonas becados</h2>
+        </div>
+        <div class="col-md-12 text-center">
+            <div class="text-center mt-4">
+                <a href="{{ url_for('graphics.download_pie_chart_scholarships') }}" class="btn btn-success">
+                    Descargar (PNG)
+                </a>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="text-center">
+        <img src="data:image/png;base64,{{ chart }}" 
+             alt="Gráfico de torta de Jinetes/Amazonas becados" 
+             style="max-width: 100%; height: auto; border: 2px solid black; margin: 2px;">
+    </div>
+    
+   
+</div>
+
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('reports.index') }}" >◄ Volver</a>
+{% endblock %}

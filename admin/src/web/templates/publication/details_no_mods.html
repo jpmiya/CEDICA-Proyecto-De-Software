@@ -1,0 +1,71 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Ver detalle de Publicacion {{ publication.title }}{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-box">
+        <h1>Detalle de la publicacion: {{ publication.title }}</h1>
+        <div class="row">
+            <!-- Fecha de publicación -->
+            <div class="col">
+                <label for="publication_date" class="form-label" style="font-size: 1.2em; font-weight: bold; color: #333;">Fecha de
+                    publicación:</label>
+                <p class="mb-3">
+                    {% if publication.publication_date %}
+                        {{ publication.publication_date.strftime('%d/%m/%Y') }}
+                    {% else %}
+                        No publicado
+                    {% endif %}
+                </p>
+            </div>
+        
+            <!-- Fecha de creación -->
+            <div class="col">
+                <label for="creation_date" class="form-label" style="font-size: 1.2em; font-weight: bold; color: #333;">Fecha de creación:</label>
+                <p class="mb-3">{{ publication.creation_date.strftime('%d/%m/%Y') }}</p>
+            </div>
+        </div>
+        
+        <!-- Título -->
+        <div class="form-group">
+            <label for="title" class="font-weight-bold" style="font-size: 1.2em; font-weight: bold; color: #333;">Título:</label>
+            <p>{{ publication.title }}</p>
+        </div>
+    
+        <!-- Resumen -->
+        <div class="form-group">
+            <label for="summary" class="font-weight-bold" style="font-size: 1.2em; font-weight: bold; color: #333;">Resumen (o Copete):</label>
+            <p>{{ publication.summary }}</p>
+        </div>
+    
+        <!-- Contenido -->
+        <div class="form-group">
+            <label for="content" class="font-weight-bold" style="font-size: 1.2em; font-weight: bold; color: #333;">Contenido:</label>
+            <div>{{ publication.content | safe }}</div>
+        </div>
+    
+        <!-- Estado -->
+        <div class="form-group">
+            <label for="state" class="font-weight-bold" style="font-size: 1.2em; font-weight: bold; color: #333;">Estado:</label>
+            <p>{{ publication.state }}</p>
+        </div>
+    
+        <!-- Autor (solo para administradores) -->
+        <div class="form-group">
+            <label for="author" class="font-weight-bold" style="font-size: 1.2em; font-weight: bold; color: #333;">Autor:</label>
+            <p>{{ author.alias }}</p>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('publication_dashboard.index') }}">◄ Volver</a>
+{% endblock %}

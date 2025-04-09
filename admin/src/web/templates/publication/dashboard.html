@@ -1,0 +1,282 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Panel de Publicaciones{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %} 
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Panel de búsqueda de publicaciones</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('publication_dashboard.index') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="order" class="form-label">Ordenar por:</label>
+                    <select name="order" id="order" class="form-select">
+                        <option value="title" {% if order=='title' %}selected{% endif %}>Titulo</option>
+                        <option value="publication_date" {% if order=='publication_date' %}selected{% endif %}>Fecha de publicacion</option>
+                        <option value="creation_date" {% if order=='creation_date' %}selected{% endif %}>Fecha de creación</option>
+                    </select>
+                </div>
+
+
+                <div class="col-md-3">
+                    <label for="search_by" class="form-label">Buscar por:</label>
+                    <select name="search_by" id="search_by" class="form-select">
+                        <option value="title" {% if search_by=='title' %}selected{% endif %}>Titulo</option>
+                        <option value="creation_date" {% if search_by=='creation_date' %}selected{% endif %}>Fecha de creación</option>
+                        <option value="publication_date" {% if search_by=='publication_date' %}selected{% endif %}>Fecha de publicacion</option>
+                        <option value="author_alias" {% if search_by=='author_alias' %}selected{% endif %}>Alias del autor</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" id="search_value">
+                    <label for="search_value" class="form-label">Valor de búsqueda:</label>
+                    <input type="text" name="search_value" id="search_value" class="form-control"
+                        value="{% if search_by == 'title' or search_by == 'author_alias'%}{{ search_value }}{% else %}{% endif %}">
+                </div>
+
+                <div class="col-md-3" id="date_value">
+                    <label for="date_value" class="form-label">Fecha de inicio:</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control"
+                        value="{% if search_by == 'creation_date' or search_by == 'publication_date' %}{{ start_date }}{% else %}{% endif %}">
+                    <label for="date_value" class="form-label">Fecha de fin:</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control"
+                        value="{% if search_by == 'creation_date' or search_by == 'publication_date' %}{{ end_date }}{% else %}{% endif %}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="button" id="toggleOrder" class="btn btn-outline-secondary form-control"
+                        value="{{ order_direction }}">
+                        {{ 'Asc' if order_direction == 'asc' else 'Desc' }}
+                    </button>
+                </div>
+
+                <input type="hidden" name="order_direction" id="orderInput" value="{{ order_direction }}">
+                <input type="hidden" name="page" id="page" value="{{ pagination.page }}">
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary" onclick="goToPage(1)">Filtrar</button>
+                </div>
+            </form>
+
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" id="resetFilters" class="btn btn-outline-danger form-control"
+                    onclick="resetPage()">Limpiar filtros</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for publication in publications %}
+            <div class="col">
+                <div class="card h-100"> <!-- Garantiza que todas las tarjetas tengan la misma altura -->
+                    <div class="card-body d-flex flex-column"> <!-- Flexbox para distribuir contenido verticalmente -->
+                        <h5 class="card-title">Titulo: {{ publication.title }}</h5>
+                        <p class="card-text">Autor: {{ alias_dict[publication.author_id] }}</p>
+                        <p class="card-text">Fecha de creación: {{ publication.creation_date.strftime('%d/%m/%Y') }}</p>
+                        {% if publication.publication_date %}
+                            <p class="card-text">Fecha de publicación: {{ publication.publication_date.strftime('%d/%m/%Y') }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-center p-3" style="gap: 3px;">
+                        <button class="btn btn-info" onclick="showPublicationDetails('{{ publication.id }}')">
+                            {% if id_user == publication.author_id or is_admin() %}
+                                Ver o Modificar
+                            {% else %}
+                                Ver detalles
+                            {% endif %}
+                        </button>
+                        {% if check_permission('publication_destroy') %}
+                            <button class="btn btn-danger" 
+                                    onclick="openDeletePublicationModal('{{ publication.id }}', '{{ publication.title }}')">
+                                Eliminar
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% if not publications %}
+    <div class="col-12 text-center my-4">
+        <div class="alert alert-warning py-4">
+            <h5>No se encontraron resultados</h5>
+            
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if publications %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage('{{ pagination.prev_num }}')" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{pagination.pages }}</a></li>
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage('{{ pagination.next_num }}')" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+   <!-- Modal -->
+    <div class="modal fade" id="deletePublicationModal" tabindex="-1" aria-labelledby="deletePublicationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deletePublicationModalLabel">Eliminar Publicación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro de que desea eliminar la publicación <strong>**<span id="publicationTitle"></span>**</strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deletePublicationForm" method="POST" action="{{ url_for('publication_dashboard.delete_publication') }}">
+                        <input type="hidden" name="publication_id" id="publicationId">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    
+</div>
+
+<script>
+    const toggleButton = document.getElementById('toggleOrder');
+    const orderInput = document.getElementById('orderInput');
+
+
+        toggleButton.addEventListener('click', function () {
+            if (toggleButton.value === 'asc') {
+                toggleButton.textContent = 'Desc';
+                toggleButton.value = 'desc';
+                orderInput.value = 'desc';
+            } else {
+                toggleButton.textContent = 'Asc';
+                toggleButton.value = 'asc';
+                orderInput.value = 'asc';
+            }
+        });
+
+        function goToPage(pageNumber) {
+            const pageInput = document.getElementById('page');
+            
+            pageInput.value = pageNumber;
+            document.forms[0].submit();
+        }
+
+        function handleFilterChange() {
+            const search_by = document.getElementById('search_by').value;
+            const searchField = document.getElementById('search_value');
+            const dateField = document.getElementById('date_value');
+            
+            
+            searchField.style.display = 'none';
+            dateField.style.display = 'none';
+            
+            if (search_by === 'creation_date' || search_by === 'publication_date') {
+                dateField.style.display = 'block';
+            } 
+            else {
+                searchField.style.display = 'block';
+            }
+    }
+
+    document.addEventListener('DOMContentLoaded', handleFilterChange);
+    document.getElementById('search_by').addEventListener('change', handleFilterChange);    
+
+    function showPublicationDetails(publicationId) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('publication_details.index') }}";
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'publication_id';
+        input.value = publicationId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function resetPage() {
+        window.location.href = "{{ url_for('publication_dashboard.index') }}";
+    }
+
+    function openDeletePublicationModal(publicationId, publicationTitle) {
+        // Configura los valores del modal
+        document.getElementById('publicationTitle').textContent = publicationTitle;
+        document.getElementById('publicationId').value = publicationId;
+
+        // Muestra el modal
+        const modal = new bootstrap.Modal(document.getElementById('deletePublicationModal'));
+        modal.show();
+    }
+
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    // Obtener la fecha actual en formato YYYY-MM-DD
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    // Establecer el máximo para ambas fechas como la fecha actual
+    startDateInput.max = currentDate;
+    endDateInput.max = currentDate;
+
+    // Función para actualizar los límites de las fechas
+    const updateDateLimits = () => {
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+
+        // Si hay una fecha de inicio, establecerla como mínimo en la fecha de fin
+        if (startDate) {
+            endDateInput.min = startDate;
+        } else {
+            endDateInput.min = '';
+        }
+
+        // Si hay una fecha de fin, establecerla como máximo en la fecha de inicio
+        if (endDate) {
+            startDateInput.max = endDate;
+        } else {
+            startDateInput.max = currentDate; // Resetea el máximo a la fecha actual si se borra la fecha de fin
+        }
+    };
+
+    // Configurar los límites al cargar la página
+    updateDateLimits();
+
+    // Configurar los límites cuando se cambie alguno de los campos
+    startDateInput.addEventListener('change', updateDateLimits);
+    endDateInput.addEventListener('change', updateDateLimits);
+
+</script>
+
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}" >◄ Volver</a>
+{% endblock %}

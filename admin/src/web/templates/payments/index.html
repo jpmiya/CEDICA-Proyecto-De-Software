@@ -1,0 +1,242 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Listado de Pagos {% endblock %}
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+{% block content %}
+
+<h2>Panel de búsqueda de pagos</h2>
+    <form id="filtros" action="{{ url_for('payments.dashboard') }}" method="GET">
+        <div class="row" style="justify-content: center;">
+            <div class="col">
+                <label for="start_date" class="form-label">Fecha Inicio</label>
+                <input 
+                    type="date" 
+                    class="form-control" 
+                    id="start_date" 
+                    name="start_date" 
+                    placeholder="Fecha Inicio" 
+                    value="{{ start_date }}"
+                    onchange="updateEndDateMin()"
+                >
+            </div>
+            <div class="col">
+                <label for="end_date" class="form-label">Fecha Fin</label>
+                <input 
+                    type="date" 
+                    class="form-control" 
+                    id="end_date" 
+                    name="end_date" 
+                    placeholder="Fecha Fin"  
+                    value="{{ end_date }}"
+                    onchange="updateStartDateMax()"
+                >
+            </div>
+            <div class="col">
+                <label for="payment_type" class="form-label">Tipo de Pago</label>
+                <select class="form-control" id="search_value" name="search_value">
+                    <option value="">Todos</option>
+                    <option value="Honorarios" {% if search_value == 'Honorarios'%}selected{%endif%}>Honorarios</option>
+                    <option value="Proveedor" {% if search_value == 'Proveedor'%}selected{%endif%}>Proveedor</option>
+                    <option value="Gastos Varios" {% if search_value == 'Gastos Varios'%}selected{%endif%}>Gastos Varios</option>
+                </select>
+            </div>
+            <div class="col">
+                
+                <label class="form-label">Ordenar por fecha:</label>
+                <select class="form-control" id="order" name="order">
+                    <option value="" {% if order == '' %} selected {% endif %}>---</option>
+                    <option value="asc" {% if order == 'asc' %} selected {% endif %}> Más viejos </option>
+                    <option value="desc" {% if order == 'desc' %} selected {% endif %}>Más recientes</option>
+                </select>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col">
+                <div class="text-end">
+                    <a class="btn btn-secondary" href="{{ url_for('payments.dashboard') }}">Limpiar Filtros</a>
+                    <button type="submit" class="btn btn-primary" onclick="goToPage(1)">Filtrar</button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="page" id="page" value="{{ pagination.page }}">
+
+    </form>
+    
+    
+    <div class="row mt-4">
+        {% for payment in payments %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        
+                        
+                        <!-- Detalles del pago -->
+                        {% if beneficiarys[payment.id] %}
+                            <p class="card-text">
+                                <strong>Beneficiario:</strong> {{ beneficiarys[payment.id] }}
+                            </p>
+                        {% endif %}
+                        <p class="card-text">
+                            <strong>Monto:</strong> ${{ payment.amount }}<br>
+                            <strong>Fecha de pago:</strong> {{ payment.payment_date.strftime('%d/%m/%Y') }}<br>
+                            <strong>Tipo de pago:</strong> {{ payment.payment_type }}
+                        </p>
+                        <!-- Botones dentro de un contenedor con espacio entre ellos -->
+                        <div class="d-flex justify-content-center" style="gap: 3px;">
+                            <!-- Botón Ver detalles -->
+                            <a class="btn btn-info" href="{{ url_for('payments.show_payment', payment_id=payment.id) }}">Ver Detalles</a>
+                            
+                            <!-- Botón Eliminar -->
+                            <button type="button" class="btn btn-danger" onclick="openDeletePaymentModal('{{ payment.id }}')">Eliminar</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        
+        {% if payments|length == 0 %}
+            <div class="col-12 text-center my-4">
+                <div class="alert alert-warning py-4">
+                    <h5>No se encontraron resultados</h5>
+                    <p class="mb-0">No se encontraron pagos registrados con esos criterios.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% if payments|length != 0 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage('{{ pagination.prev_num }}')" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{
+                        pagination.pages }}</a></li>
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage('{{ pagination.next_num }}')" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+    <!-- Modal -->
+    <div class="modal fade" id="deletePaymentModal" tabindex="-1" aria-labelledby="deletePaymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deletePaymentModalLabel">Eliminar Pago</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro de que desea eliminar este pago? Esta acción es <strong>irreversible</strong>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deletePaymentForm" method="POST" action="{{ url_for('payments.delete_payment') }}">
+                        <input type="hidden" name="payment_id" id="paymentId">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    
+
+<script>
+    const toggleButton = document.getElementById('toggleOrder');
+    const orderInput = document.getElementById('orderInput');
+    
+    function openDeletePaymentModal(paymentId) {
+        // Configura el ID del pago en el modal
+        document.getElementById('paymentId').value = paymentId;
+
+        // Muestra el modal
+        const modal = new bootstrap.Modal(document.getElementById('deletePaymentModal'));
+        modal.show();
+    }
+
+
+    function goToPage(pageNumber) {
+        const pageInput = document.getElementById('page');
+        
+        pageInput.value = pageNumber;
+        document.forms[0].submit();
+    }
+
+
+    function resetPage() {
+        window.location.href = "{{ url_for('team_dashboard.order') }}";
+    }
+
+    function validateDateRange() {
+        const startDate = document.getElementById("start_date").value;
+        const endDate = document.getElementById("end_date").value;
+
+        if (startDate && endDate && startDate > endDate) {
+            alert("La fecha de inicio debe ser menor o igual a la fecha de fin.");
+            return false;
+        }
+        return true;
+    }
+    
+</script>
+<script>
+    function updateEndDateMin() {
+        const startDate = document.getElementById("start_date").value;
+        const endDateInput = document.getElementById("end_date");
+        
+        if (startDate) {
+            endDateInput.min = startDate;
+
+            // Si la fecha actual en el campo end_date es menor que el mínimo, limpiarlo
+            if (endDateInput.value && endDateInput.value < startDate) {
+                endDateInput.value = '';
+            }
+        } else {
+            // Si start_date está vacío, eliminar el mínimo de end_date
+            endDateInput.min = '';
+        }
+
+    }
+
+    function updateStartDateMax() {
+        const endDate = document.getElementById("end_date").value;
+        const startDateInput = document.getElementById("start_date");
+
+        if (endDate) {
+            startDateInput.max = endDate;
+
+            // Si la fecha actual en el campo start_date es mayor que el máximo, limpiarlo
+            if (startDateInput.value && startDateInput.value > endDate) {
+                startDateInput.value = '';
+            }
+        } else {
+            // Si end_date está vacío, eliminar el máximo de start_date
+            startDateInput.max = '';
+        }
+    }
+    
+
+</script>
+
+
+
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}" >◄ Volver</a>
+{% endblock %}
+

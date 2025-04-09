@@ -1,0 +1,104 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Ver detalle de Publicacion {{ publication.title }}{% endblock %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+    
+
+{% block content %}
+<div class="form-container">
+    <div class="form-box">
+        <h1>Detalle de la publicacion: {{ publication.title }}</h1>
+
+        <form method="POST" action="{{ url_for('publication_details.update_publication') }}">
+            <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+            <div class="row">
+                <!-- Fecha de publicación -->
+                <div class="col">
+                    <label for="publication_date" class="form-label">Fecha de publicación:</label>
+                    <h5 class="mb-3">
+                        {% if publication.publication_date %}
+                            {{ publication.publication_date.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            No publicado
+                        {% endif %}
+                    </h5>
+                </div>
+            
+                <!-- Fecha de creación -->
+                <div class="col">
+                    <label for="creation_date" class="form-label">Fecha de creación:</label>
+                    <h5 class="mb-3">{{ publication.creation_date.strftime('%d/%m/%Y') }}</h5>
+                </div>
+            </div>
+            
+        
+            <!-- Título -->
+            <div class="form-group">
+                <label for="title" class="font-weight-bold">Título (*):</label>
+                <input type="text" id="title" name="title" maxlength="100" value="{{ publication.title }}" class="form-control">
+            </div>
+        
+            <!-- Resumen -->
+            <div class="form-group">
+                <label for="summary" class="font-weight-bold">Resumen (o Copete) (*):</label>
+                <textarea id="summary" name="summary" maxlength="255" class="form-control" rows="3">{{ publication.summary }}</textarea>
+            </div>
+        
+            <!-- Contenido -->
+            <div class="form-group">
+                <label for="content" class="font-weight-bold">Contenido: (*)</label>
+                <textarea id="content" name="content" class="form-control" rows="5">{{ publication.content }}</textarea>
+            </div>
+        
+            <!-- Estado -->
+            <div class="form-group">
+                <label for="state" class="font-weight-bold">Estado: (*)</label>
+                <select id="state" name="state" class="form-control">
+                    <option value="Borrador" {% if publication.state == 'Borrador' %} selected {% endif %}>Borrador</option>
+                    <option value="Publicado" {% if publication.state == 'Publicado' %} selected {% endif %}>Publicado</option>
+                    <option value="Archivado" {% if publication.state == 'Archivado' %} selected {% endif %}>Archivado</option>
+                </select>
+            </div>
+        
+            <!-- Autor (solo para administradores) -->
+            {% if is_admin() %}
+            <div class="form-group">
+                <label for="author" class="font-weight-bold">Autor: (*)</label>
+                <select id="author" name="author" class="form-control">
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if publication.author_id == user.id %} selected {% endif %}>{{ user.alias }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+        
+            <!-- Campos ocultos -->
+            <input type="hidden" name="publication_id" value="{{ publication.id }}">
+            <input type="hidden" name="author_id" value="{{ publication.author_id }}">
+            <div class="row text-end">
+                <div class="col text-end">
+                    <!-- Botón de envío -->
+                    <button type="submit" class="btn btn-primary btn-block mt-3">Actualizar</button>
+                </div>
+               
+            </div>
+            
+        </form>
+        
+    </div>
+</div>
+
+<script>
+    CKEDITOR.replace('content');
+    CKEDITOR.config.height = 200;
+    CKEDITOR.config.width = 'auto';
+</script>
+
+{% endblock %}
+{% block volver %}
+    <br>
+    <a class="btn btn-danger" href="{{ url_for('publication_dashboard.index') }}">◄ Volver</a>
+{% endblock %}

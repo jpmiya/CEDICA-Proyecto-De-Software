@@ -1,0 +1,136 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Listado de Cobros{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    <h2>Cobros de jinetes/amazonas</h2>
+    <form id="filtros" action="{{ url_for('charges.index_charges') }}" method="GET">
+        <div class="row" style="justify-content: center;">
+            <div class="col">
+                <label for="start_date" class="form-label">Fecha inicio</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col">
+                <label for="end_date" class="form-label">Fecha fin</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col">
+                <label for="payment_method" class="form-label">Medio de pago</label>
+                <select class="form-control" id="payment_method" name="payment_method">
+                    <option value="">Todos</option>
+                    <option value="EFECTIVO" {% if payment_method == 'EFECTIVO' %}selected{% endif %}>Efectivo</option>
+                    <option value="TARJETA_CREDITO" {% if payment_method == 'TARJETA_CREDITO' %}selected{% endif %}>Tarjeta de Crédito</option>
+                    <option value="TARJETA_DEBITO" {% if payment_method == 'TARJETA_DEBITO' %}selected{% endif %}>Tarjeta de Débito</option>
+                </select>
+            </div>
+            
+            
+        </div>
+        <div class="row" style="justify-content: center;">
+            <div class="col">
+                <label for="receiver_name" class="form-label">Nombre de quién recibe</label>
+                <input type="text" class="form-control" id="receiver_name" name="receiver_name" value="{{ receiver_first_name if receiver_first_name != None else '' }}">
+            </div>
+            <div class="col">
+                <label for="receiver_last_name" class="form-label">Apellido de quién recibe</label>
+                <input type="text" class="form-control" id="receiver_last_name" name="receiver_last_name" value="{{ receiver_last_name if receiver_last_name != None else '' }}">
+            </div>
+            <div class="col">
+                <label for="rider_id" class="form-label">Jinete/Amazona</label>
+                <select class="form-control" id="rider_id" name="rider_id">
+                    <option value="">Todos</option>
+                    {% for rider in riders %}
+                        <option value="{{ rider.id }}" {% if rider.id == rider_id|int %}selected{% endif %}>
+                            {{ rider.name }} {{ rider.last_name }} - DNI: {{ rider.dni }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <label class="form-label">Ordenar por:</label>
+                <select class="form-control" id="order" name="order">
+                    <option value="" {% if order == '' %} selected {% endif %}>---</option>
+                    <option value="asc" {% if order == 'asc' %} selected {% endif %}> Más viejos </option>
+                    <option value="desc" {% if order == 'desc' %} selected {% endif %}>Más recientes</option>
+                </select>
+                
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col">
+                <div class="text-end">
+                    <a class="btn btn-secondary me-2" href="{{ url_for('charges.index_charges') }}">Limpiar Filtros</a>
+                    <button type="submit" class="btn btn-primary" href="{{ url_for('charges.index_charges') }}">Filtrar</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+    <div class="row mt-4">
+        {% for charge in charges %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <!-- Título con nombre del jinete -->
+                        <h5 class="card-title">{{ charge.rider.name }} {{ charge.rider.last_name }}</h5>
+                        <!-- Detalles del cobro -->
+                        <p class="card-text">
+                            <strong>Fecha de pago:</strong> {{ charge.formatted_charge_date() }}<br>
+                            <strong>Monto:</strong> ${{ charge.amount }}<br>
+                            <strong>Medio de pago:</strong> {{ charge.payment_method.value.replace('_', ' ').title() }}<br>
+                            <strong>Recibido por:</strong> {{ charge.employee.name.title() }} {{ charge.employee.last_name.title()}}
+                        </p>
+                        <!-- Botones dentro de un contenedor con espacio entre ellos -->
+                        <div class="d-flex justify-content-center" style="gap: 3px;">
+                            <!-- Botón Ver detalles -->
+                            <a class="btn btn-info" href="{{ url_for('charges.show_charge', id=charge.id) }}">Ver Detalles</a>
+                            
+                            <!-- Botón Editar -->
+                            <a class="btn btn-warning" href="{{ url_for('charges.edit_charge', id=charge.id) }}">Editar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        {% if charges|length == 0 %}
+            <div class="col-12 text-center my-4">
+                <div class="alert alert-warning py-4">
+                    <h5>No se encontraron resultados</h5>
+                    <p class="mb-0">No se encontraron cobros registrados con esos criterios.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% if charges|length != 0 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ prev_page }}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ pagination.page }} de {{ pagination.pages }}</a></li>
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ next_page }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('auth.home') }}">◄ Volver</a>
+{% endblock %}

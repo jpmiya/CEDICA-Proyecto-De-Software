@@ -1,0 +1,59 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Contactos {% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<h2>Formulario de Contacto</h2>
+
+    <form method="POST" action="{{ url_for('contacts.update', consulta_id=consulta_id) }}">
+        <p class="text-muted" style="text-shadow: 1px 1px 2px gray;">(*) espacios obligatorios</p>
+        <div class="mb-3">
+            <label for="full_name" class="form-label">Nombre Completo </label>
+            <input type="text" class="form-control" id="full_name"
+            name="full_name" value="{{ params.get('full_name', '') }}" disabled>
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email </label>
+            <input type="email" class="form-control" id="email"
+            name="email" value="{{ params.get('email', '') }}" disabled>
+        </div>
+
+        <div class="mb-3">
+            <label for="date" class="form-label">Fecha de la consulta</label>
+            <input type="date" class="form-control" id="date" name="date"
+            value="{{ params.get('date', '') }}" disabled>
+        </div>
+
+        <div class="mb-3">
+            <label for="message" class="form-label">Mensaje </label>
+            <textarea class="form-control" id="message" name="message" disabled>{{ params.get('message', '') }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="state" class="form-label">Estado (*)</label>
+            <select class="form-control" id="state" name="state" required>
+                <option value="" {% if params.get('state') == '' %}selected{% endif %} >---</option>
+                <option value="pendiente" {% if params.get('state') == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                <option value="en proceso" {% if params.get('state') == 'en proceso' %}selected{% endif %}>En Proceso</option>
+                <option value="terminado" {% if params.get('state') == 'terminado' %}selected{% endif %}>Terminado</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="coment" class="form-label">Comentario</label>
+            <textarea class="form-control" id="comment" name="comment">{{ params.get('comment', '') }}</textarea>
+        </div>
+        <button type="reset" class="btn btn-secondary">Limpiar</button>
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+    </form>
+
+{% endblock %}
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('contacts.show', consulta_id = consulta_id) }}">◄ Volver</a>
+{% endblock %}

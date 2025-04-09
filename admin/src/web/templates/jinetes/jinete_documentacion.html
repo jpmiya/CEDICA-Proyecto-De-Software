@@ -1,0 +1,324 @@
+{% extends "templates_base/layout.html" %}
+
+{% block navbar%}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    
+    <h3> {{ name }} {{ last_name }} </h3>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            
+            <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="{{ url_for('riders.show_rider', user_id=user_id) }}">Información general</a>
+            </li>
+        
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('riders.show_documentation', user_id=user_id) }}">Documentación</a>
+            </li> 
+        </ul>
+    </div>
+
+    
+
+    <!-- Filtros -->
+    <br>
+    <form id="filtros_documentos" method="get" class="responsive-form">
+        <!-- Primera fila -->
+        <div>
+            <!-- Título -->
+            <div>
+                <label for="title" class="form-label fw-bold">Título</label>
+                <input id="title" name="title" class="form-control" 
+                        value="{{ params.get('title', '') }}" 
+                        placeholder="Ingrese el título">
+            </div>
+            <!-- Tipo -->
+            <div>
+                <label for="type" class="form-label fw-bold">Tipo</label>
+                <select id="type" name="type" class="form-select">
+                    <option value="" {% if params.get('type', '')=='' %}selected{% endif %}>Seleccione una opción</option>
+                    <option value="entrevista" {% if params.get('type', '')=='entrevista' %}selected{% endif %}>Entrevista</option>
+                    <option value="evaluacion" {% if params.get('type', '')=='evaluacion' %}selected{% endif %}>Evaluación</option>
+                    <option value="planificaciones" {% if params.get('type', '')=='planificaciones' %}selected{% endif %}>Planificaciones</option>
+                    <option value="evolucion" {% if params.get('type', '')=='evolucion' %}selected{% endif %}>Evolución</option>
+                    <option value="cronicas" {% if params.get('type', '')=='cronicas' %}selected{% endif %}>Crónicas</option>
+                    <option value="documental" {% if params.get('type', '')=='documental' %}selected{% endif %}>Documental</option>
+                </select>
+            </div>
+            <!-- Ordenar por -->
+            <div>
+                <label for="orden" class="form-label fw-bold">Ordenar por</label>
+                <select name="sort" id="orden" class="form-select">
+                    <option value="" {% if params.get('sort', '')=='' %}selected{% endif %}>Seleccione un orden</option>
+                    <option value="nombre_asc" {% if params.get('sort', '')=='nombre_asc' %}selected{% endif %}>Título A-Z</option>
+                    <option value="nombre_desc" {% if params.get('sort', '')=='nombre_desc' %}selected{% endif %}>Título Z-A</option>
+                    <option value="mas_recientes" {% if params.get('sort', '')=='mas_recientes' %}selected{% endif %}>Más recientes</option>
+                    <option value="mas_viejos" {% if params.get('sort', '')=='mas_viejos' %}selected{% endif %}>Más viejos</option>
+                </select>
+            </div>
+        </div>
+        <hr>
+        <!-- Botones -->
+        <div class="row">
+            <div class="col">
+                <div class="text-end">
+                    <a href="{{ url_for('riders.show_documentation', user_id=user_id) }}" class="btn btn-secondary">Limpiar filtros</a>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <br>
+    
+    <div class="row justify-content-center g-3">
+        <div class="col-auto">
+            <a class="btn btn-secondary btn-lg" href="{{ url_for('riders.show_upload_link', user_id=user_id) }}">
+                Subir enlace
+            </a>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-primary btn-lg" href="{{ url_for('riders.show_upload_document', user_id=user_id) }}">
+                Subir nuevo documento
+            </a>
+        </div>
+    </div>
+    <br>
+    
+    <!--Listado-->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% if docs_paginated.items|length == 0 %}
+            <div class="col-md-12 text-center" style="justify-content: center;">
+                <div class="alert alert-warning">
+                    No hay documentos cargados sobre el jinete/amazona.
+                </div>
+            </div>
+        {% else %}
+            {% for document in docs_paginated.items %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-truncate text-center" style="max-width: 100%;">{{ document.title.capitalize() }}</h5>
+                        <p class="card-text">Tipo de archivo: {{ document.document_type.capitalize() }}</p>
+                        <p class="card-text">Fecha de subida: {{ document.readable_created_date() }}</p>
+                        
+                        {% if document.format == 'link' %}
+                            <a class="btn btn-info mb-2" href="{{ document.source }}" target="_blank">Ir a archivo</a>
+                        {% else %}
+                            <button type="button" class="btn btn-info mb-2" onclick="downloadFile('{{ document.id }}', '{{ user_id }}')">Descargar</button>
+                        {% endif %}
+                        
+                        {% if check_permission('rider.update') %}
+                            <div class="text-center">
+                                <button type="button" class="btn btn-warning mr-2 mb-2" onclick="showUpdateModal('{{ document.id }}', '{{ document.title }}', '{{ document.document_type }}')">Modificar</button>
+                                <button type="button" class="btn btn-danger mb-2" onclick="showDeleteModal('{{ document.id }}', '{{ user_id }}', '{{ docs_paginated.page }}', '{{ params.orden }}', '{{ params.ascendente }}', '{{ params.title }}', '{{ params.document_type }}')">Eliminar</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    {% if docs_paginated.items|length != 0 %}
+        <!-- Sección paginación -->
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if docs_paginated.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ prev_page }}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item disabled"><a class="page-link" href="#">Página {{ docs_paginated.page }} de {{
+                        docs_paginated.pages }}</a></li>
+                {% if docs_paginated.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ next_page }}" aria-label="Siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+  
+
+    
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+            ¿Estás seguro de que deseas eliminar este documento?. Esta accion es <strong>Irreversible</strong>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Modal de actualizacion -->
+    <div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="updateModalLabel">Modificar Documento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <form id="updateForm">
+                <!-- Input del título -->
+                <div class="mb-3">
+                <label for="documentTitle" class="form-label">Título del documento</label>
+                <input type="text" class="form-control" id="documentTitle" required>
+                </div>
+                <!-- Select del tipo de documento -->
+                <div class="mb-3">
+                <label for="documentType" class="form-label" >Tipo de documento</label>
+                <select class="form-select" id="documentType" name="document_type" required>
+                    <option value="entrevista">Entrevista</option>
+                    <option value="evaluacion">Evaluación</option>
+                    <option value="planificaciones">Planificaciones</option>
+                    <option value="evolucion">Evolución</option>
+                    <option value="cronicas">Crónicas</option>
+                    <option value="documental">Documental</option>
+                </select>
+                </div>
+                <!-- Botón de confirmación -->
+                <button type="button" class="btn btn-primary" onclick="confirmUpdate()">Actualizar</button>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    
+<script>
+    function downloadFile(documentId, riderId) {
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = " {{ url_for('riders.download_rider_file', user_id = user_id) }} ";
+        const input = document.createElement('input');
+        const input2 = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'document_id';
+        input.value = documentId;
+        input2.type = 'hidden';
+        input2.name = 'rider_id';
+        input2.value = riderId;
+
+        form.appendChild(input);
+        form.appendChild(input2);
+        document.body.appendChild(form);
+        form.submit();
+        
+    }
+</script>
+
+
+
+<script>
+    let documentIdToDelete, userIdToDelete, pageToDelete, ordenToDelete, order_byToDelete, titleToDelete, typeToDelete;
+    function showDeleteModal(documentId, userId, page, orden, order_by, title, type) {
+        // Guardar los datos para usarlos después, para que paginando no me vuelva a la primera sin filtros
+        documentIdToDelete = documentId;
+        userIdToDelete = userId;
+        pageToDelete = page;
+        ordenToDelete = orden;
+        order_byToDelete = order_by;
+        titleToDelete = title;
+        typeToDelete = type;
+
+        // Mostrar el modal
+        const deleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        deleteModal.show();
+    }
+
+    // Escuchar para ver si se hace una confirmación
+    document.getElementById('confirmDeleteButton').addEventListener('click', function() {
+        // Cerrar el modal
+        const deleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+        deleteModal.hide();
+        
+        const url = "/jinetes_amazonas/datos_personales/" + userIdToDelete + "/eliminar_doc";
+        
+        // Realizar la solicitud POST para eliminar el documento
+        $.post(url, { document_id: documentIdToDelete })
+            .done(function() {
+                // Recargar la página de inicio sin parámetros (recarga desde cero)
+                window.location.href = "/jinetes_amazonas/datos_personales/" + userIdToDelete + "/documentos";
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Error en la solicitud:", textStatus, errorThrown);
+                alert("Error al eliminar el documento. Por favor, intenta nuevamente.");
+            });
+    });
+</script>
+
+<script>
+    function showUpdateModal(documentId, documentTitle, documentType) {
+        // Establecer el título en el campo de entrada
+        document.getElementById('documentTitle').value = documentTitle;
+
+        // Establecer el tipo de documento en el select
+        document.getElementById('documentType').value = documentType;
+        
+        // Almacenar el ID del documento (opcional)
+        document.getElementById('updateForm').dataset.documentId = documentId;
+
+        // Mostrar el modal
+        var modal = new bootstrap.Modal(document.getElementById('updateModal'));
+        modal.show();
+    }
+
+    function confirmUpdate() {
+        const documentId = document.getElementById('updateForm').dataset.documentId;
+        const updatedTitle = document.getElementById('documentTitle').value;
+        const updatedType = document.getElementById('documentType').value;
+        const userId = '{{ user_id }}';  // Obtén el ID del usuario desde el backend
+        
+        fetch(`/jinetes_amazonas/datos_personales/${userId}/modificar_doc`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  // Si usas CSRF en tu aplicación
+            },
+            body: JSON.stringify({
+                document_id: documentId,
+                title: updatedTitle,
+                document_type: updatedType,
+            })
+        })
+        .then(response => response.json())  // Cambia a `response.text()` si necesitas verificar el contenido
+        .then(data => {
+            if (data.success) {
+                // Recargar la página desde cero
+                window.location.href = "/jinetes_amazonas/datos_personales/" + userId + "/documentos";
+            } else {
+                // Manejar errores
+                window.location.href = "/jinetes_amazonas/datos_personales/" + userId + "/documentos";
+                
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+{% endblock %}
+{% block volver %}
+    <a class="btn btn-danger"href="{{ url_for('riders.index') }}">◄ Volver</a>
+{% endblock %}

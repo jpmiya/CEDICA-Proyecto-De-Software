@@ -1,0 +1,128 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %} Registrar un cobro {% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    <h2>
+        {% if not cobro %}
+            Registrar un nuevo cobro
+        {% else %}
+            Editar cobro
+        {% endif %}
+    </h2>
+    <form method="POST" action="{{ url_for('charges.update_charge', id=cobro.id) if cobro else url_for('charges.create_charge') }}">
+        <p class="text-muted">* Todos los campos con un (*) son obligatorios</p>
+
+        <div class="mb-3">
+            <label for="rider_id" class="form-label">Jinete/Amazona (*)</label>
+            <select class="form-control" id="rider_id" name="rider_id" required>
+                <option value="" {% if params.get('rider_id', '') == '' %}selected{% endif %} disabled>Selecciones un Jinete/amazona</option>
+                {% for rider in riders %}
+                    <option value="{{ rider.id }}" {% if params.get('rider_id', '')|int == rider.id %}selected{% endif %}>
+                        {{ rider.name }} {{ rider.last_name }} - DNI: {{ rider.dni }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="charge_date" class="form-label">Fecha del Cobro (*)</label>
+            <input type="date" class="form-control" id="charge_date" 
+            name="charge_date" required
+            value="{{ params.get('charge_date', '') }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="payment_method" class="form-label">Medio de Cobro (*)</label>
+            <select class="form-control" id="payment_method" name="payment_method" required>
+                <option value="" {% if params.get('payment_method', '') == '' %}selected{% endif %} disabled>Seleccione un medio de cobro</option>
+                <option value="EFECTIVO" {% if params.get('payment_method') == 'EFECTIVO' %}selected{% endif %}>Efectivo</option>
+                <option value="TARJETA_CREDITO" {% if params.get('payment_method') == 'TARJETA_CREDITO' %}selected{% endif %}>Tarjeta de Crédito</option>
+                <option value="TARJETA_DEBITO" {% if params.get('payment_method') == 'TARJETA_DEBITO' %}selected{% endif %}>Tarjeta de Débito</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="amount" class="form-label">Monto (*)</label>
+            <input type="text" class="form-control" id="amount"
+                   name="amount" value="{{ params.get('amount', '') }}" required
+                   />
+            <small class="form-text text-muted">
+                Use un punto (.) para separar los centavos. Ejemplo: 123.45
+            </small>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Deudor (*)</label>
+            <div class="custom_radio">
+                <label>
+                    <input type="radio" name="debt" id="debt_yes" value="yes"
+                    {% if params.get('debt', '') == 'yes' %}checked{% endif %}
+                    required/>
+                    <span>Si</span>
+                </label>
+                <label>
+                    <input type="radio" name="debt" id="debt_no"value="no" required 
+                    {% if params.get('debt', '') == 'no' %}checked{% endif %}/>
+                    <span>No</span>
+                </label>
+               
+                
+            </div>
+        </div>
+        
+
+        <div class="mb-3">
+            <label for="receiver_id" class="form-label">Recibido por (*)</label>
+            <select class="form-control" id="receiver_id" name="receiver_id" required>
+                <option value="" {% if params.get('receiver_id', '') == '' %} selected {% endif %}>Seleccione un empleado</option>
+                {% for employee in employees %}
+                    <option value="{{ employee.id }}" {% if params.get('receiver_id', '')|int == employee.id %}selected{% endif %}>
+                        {{ employee.name }} {{ employee.last_name }} - DNI: {{ employee.dni }}
+                    </option>
+                {% endfor %}
+                </ul>
+            
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="notes" class="form-label">Observaciones (opcional)</label>
+            <textarea class="form-control" id="notes" name="observations">{{ params.get('observations', '') }}</textarea>
+        </div>
+        <div class="row">
+            <div class="col text-end">
+                <button type="submit" class="btn btn-primary">{{ 'Actualizar' if cobro else 'Registrar' }}</button>
+            </div>
+            
+        </div>
+        
+    </form>
+<script>
+    document.getElementById('amount').addEventListener('input', function (e) {
+        const value = e.target.value;
+    
+        // Expresión regular para validar números con una sola coma
+        const isValid = /^[0-9]*.?[0-9]{0,2}$/.test(value);
+    
+        if (!isValid) {
+            // Si el valor no es válido, elimina el último carácter ingresado
+            e.target.value = value.slice(0, -1);
+        }
+    });
+</script>
+<script>
+    const today = new Date().toISOString().split('T')[0];
+    
+    document.getElementById('charge_date').setAttribute('max', today);
+</script>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('charges.index_charges') }}" >◄ Volver</a>
+{% endblock %}

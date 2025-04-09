@@ -1,0 +1,35 @@
+{% extends "templates_base/layout.html" %}
+
+{% block title %}Detalle de Consulta{% endblock %}
+
+{% block navbar %}
+    {% include "templates_base/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ consulta.full_name }}</h5>
+                <p class="card-text">
+                    <strong>Fecha:</strong> {{ consulta.get_readable_creation_date }}<br>
+                    <strong>Email:</strong> {{ consulta.email }}<br>
+                    <strong>Titulo:</strong> {{ consulta.title }}<br>
+                    <strong>Estado:</strong> {{ consulta.state }}<br>
+                    <strong>Comentario:</strong> {{ consulta.coment }}<br>
+                    <strong>Mensaje:</strong> {{ consulta.message }}
+                </p>
+                <div class="d-flex justify-content-center" style="gap: 3px;">
+                    <a class="btn btn-warning" href="{{ url_for('contacts.show_update', consulta_id=consulta.id) }}">Editar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block volver %}
+<br>
+    <a class="btn btn-danger" href="{{ url_for('contacts.index') }}">◄ Volver</a>
+{% endblock %}
